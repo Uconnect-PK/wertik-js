@@ -31,7 +31,11 @@ const Wertik: (configuration?: WertikConfiguration) => Promise<WertikApp> = (
       configuration.appEnv = configuration.appEnv ?? "local"
 
       const port = get(configuration, "port", 1200)
-      const skip = get(configuration, "skip", false)
+      const selfStart = get(
+        configuration,
+        "selfStart",
+        get(configuration, "skip", true)
+      )
       const expressApp = get(configuration, "express", express())
       const httpServer = http.createServer(expressApp)
 
@@ -185,7 +189,7 @@ const Wertik: (configuration?: WertikConfiguration) => Promise<WertikApp> = (
 
       if (!new Object(process.env).hasOwnProperty("TEST_MODE")) {
         setTimeout(async () => {
-          if (skip === false) {
+          if (selfStart === true) {
             startServer()
           }
           resolve({

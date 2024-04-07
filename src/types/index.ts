@@ -44,8 +44,17 @@ export interface WertikConfiguration {
   httpServer?: iObject
   /**
    * [Optional] When passed as true, Wertik will not start server.
+   * 
+   * @deprecated Use `selfStart` instead.
+   * @default true
    */
   skip?: boolean
+
+  /**
+   * When passed as true, Wertik will not start server.
+   * @default true
+   */
+  selfStart?: boolean
   /**
    * Database connections
    */

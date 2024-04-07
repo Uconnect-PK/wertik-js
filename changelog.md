@@ -18,6 +18,7 @@
 - Appended `Module` after module names in GraphQL types, e.g., `User` is now `UserModule`.
 - Added tests to ensure GraphQL operations function correctly.
 - Introduced an option to output GraphQL type definitions in a file.
+- Change configuration prop `skip` to `selfStart` to make it more intuitive.
 
 
 ### 3.3.0

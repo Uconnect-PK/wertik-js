@@ -1,6 +1,6 @@
 import { Sequelize } from "sequelize"
 import { databaseDefaultOptions } from "../../utils/defaultOptions"
-import { UseMysqlDatabaseProps } from "../../types/database"
+import { WithMysqlDatabaseProps } from "../../types/database"
 import get from "lodash.get"
 import {
   wLog,
@@ -20,7 +20,7 @@ export const getAllRelationships = (dbName: string) => {
   `
 }
 
-export const useMysqlDatabase = function (obj: UseMysqlDatabaseProps) {
+export const withMysqlDatabase = function (obj: WithMysqlDatabaseProps) {
   return async () => {
     try {
       let sequelize = new Sequelize(obj.name, obj.username, obj.password, {
@@ -58,4 +58,4 @@ export const useMysqlDatabase = function (obj: UseMysqlDatabaseProps) {
 /**
  * @deprecated use useMysqlDatabase, useDatabase is deprecated and will be removed in 3.5.0 version.
  */
-export const useDatabase = useMysqlDatabase
+export const useDatabase = withMysqlDatabase

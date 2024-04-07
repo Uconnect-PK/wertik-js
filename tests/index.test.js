@@ -2,13 +2,13 @@ require("dotenv").config()
 
 const {
   default: wertik,
-  useLogger,
-  useWinstonTransport,
-  useIndependentWebSocketsServer,
-  useSocketIO,
-  useWebSockets,
-  useMailer,
-  useGraphql,
+  withLogger,
+  withWinstonTransport,
+  withIndependentWebSocketsServer,
+  withSocketIO,
+  withWebSockets,
+  withMailer,
+  withApolloGraphql,
 } = require("./../lib/index")
 
 test("Expect no configuration can start the server", async () => {
@@ -27,7 +27,7 @@ test("Expect mailer to work without configuration and does not causes error", as
   await expect(
     wertik({
       mailer: {
-        default: useMailer({
+        default: withMailer({
           name: "Default",
         }),
       },
@@ -35,25 +35,25 @@ test("Expect mailer to work without configuration and does not causes error", as
   ).resolves.not.toThrowError()
 })
 
-test("Expect graphql to work with useGraphql and does not causes error", async () => {
+test("Expect graphql to work with withApolloGraphql and does not causes error", async () => {
   await expect(
     wertik({
-      graphql: useGraphql(),
+      graphql: withApolloGraphql(),
     })
   ).resolves.not.toThrowError()
 })
 
-test("Expect useWebSockets, useIndependentWebSocketsServer and useSocketIO works and does not throw any error", async () => {
+test("Expect withWebSockets, withIndependentWebSocketsServer and withSocketIO works and does not throw any error", async () => {
   await expect(
     wertik({
       sockets: {
-        mySockets: useWebSockets({
+        mySockets: withWebSockets({
           path: "/websockets",
         }),
-        socketio: useSocketIO({
+        socketio: withSocketIO({
           path: "/mysocketioserver",
         }),
-        mySockets2: useIndependentWebSocketsServer({
+        mySockets2: withIndependentWebSocketsServer({
           port: 1500,
         }),
       },
@@ -66,8 +66,8 @@ test("Expect useWebSockets, useIndependentWebSocketsServer and useSocketIO works
 test("Expect logger to run without throwing any error", async () => {
   await expect(
     wertik({
-      logger: useLogger({
-        transports: useWinstonTransport((winston) => {
+      logger: withLogger({
+        transports: withWinstonTransport((winston) => {
           return [
             new winston.transports.File({
               filename: "info.log",

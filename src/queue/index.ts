@@ -1,7 +1,7 @@
 import Queue from "bull"
 import { isPackageInstalled } from "../utils/checkInstalledPackages"
 import { WertikApp, WertikConfiguration } from "../types"
-import { UseQueueProps } from "./../types/queue"
+import { WithQueueProps } from "./../types/queue"
 import { wLog } from "../utils/log"
 
 /**
@@ -11,7 +11,7 @@ import { wLog } from "../utils/log"
  * @returns Queue
  */
 
-export const useQueue = (props: UseQueueProps) => {
+export const withQueue = (props: WithQueueProps) => {
   return () => new Queue(props.name, props.url, props.options)
 }
 

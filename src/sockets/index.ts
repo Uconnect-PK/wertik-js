@@ -14,7 +14,7 @@ import { WertikApp, WertikConfiguration } from "../types"
  * @param props see interface WebSocketServerOptions
  * @returns WebSocketServer instance
  */
-export const useWebSockets = (props: WebSocketServerOptions = {}) => {
+export const withWebSockets = (props: WebSocketServerOptions = {}) => {
   return ({
     configuration,
     wertikApp,
@@ -41,7 +41,7 @@ export const useWebSockets = (props: WebSocketServerOptions = {}) => {
  * @param props see interface WebSocketServerOptions
  * @returns WebSocketServer instance
  */
-export const useIndependentWebSocketsServer = (
+export const withIndependentWebSocketsServer = (
   props: WebSocketServerOptions = {}
 ) => {
   return ({
@@ -66,7 +66,7 @@ export const useIndependentWebSocketsServer = (
  * @param props see interface SocketIOServerOptions from socket.io
  * @returns SocketIOServer
  */
-export const useSocketIO = (props: any = {}) => {
+export const withSocketIO = (props: any = {}) => {
   return ({
     configuration,
     wertikApp,

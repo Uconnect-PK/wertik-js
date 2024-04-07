@@ -4,16 +4,16 @@ Wertik-js allows extending your app with more features using the `modules` term.
 
 ```js
 import wertik, {
-  useMysqlDatabase,
-  useMailer,
-  useModule,
-  useGraphql,
+  withMysqlDatabase,
+  withMailer,
+  withModule,
+  withGraphql,
 } from "wertik-js/lib/";
 
 weritk({
   port: 1200,
   database: {
-    default: useMysqlDatabase({
+    default: withMysqlDatabase({
       name: "default",
       password: "pass",
       host: "localhost",
@@ -21,16 +21,16 @@ weritk({
       username: "root",
     }),
   },
-  graphql: useGraphql(),
+  graphql: withGraphql,(),
   mailer: {
-    default: useMailer(),
+    default: withMailer(),
   },
   modules: {
-    users: useModule({
+    users: withModule({
       table: "users",
       database: "default",
       name: "users",
-      useMysqlDatabase: true,
+      useDatabase: true,
     }),
   },
 });
@@ -48,10 +48,10 @@ When you provide `useMysqlDatabase: true`, `table` and `database`, Wertik JS aut
 You have to initialize its module in this way:
 
 ```js
-import wertik, { useModule, useMysqlDatabase, useGraphql } from "wertik-js/lib/";
+import wertik, { useModule, useMysqlDatabase, withGraphql, } from "wertik-js/lib/";
 wertik({
   port: 1200,
-  graphql: useGraphql(),
+  graphql: withGraphql,(),
   database: {
     default: useMysqlDatabase({
       name: "dbname",

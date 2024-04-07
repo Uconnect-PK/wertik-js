@@ -1,6 +1,6 @@
 import { QueueOptions } from "bull"
 
-export interface UseQueueProps {
+export interface WithQueueProps {
   name: string
   url?: string
   options?: QueueOptions

@@ -1,5 +1,5 @@
 import get from "lodash.get"
-import { UseModuleProps } from "../types/modules"
+import { WithModuleProps } from "../types/modules"
 import { TableInfo } from "../types/database"
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter"
 import crud from "../crud"
@@ -63,7 +63,7 @@ export const getGraphQLTypeNameFromSqlType = (
 }
 
 export const getUpdateSchema = (
-  module: UseModuleProps,
+  module: WithModuleProps,
   tableInfo: TableInfo
 ) => {
   const optionsUpdateSchema = get(module, "graphql.updateSchema", "")
@@ -82,7 +82,7 @@ export const getUpdateSchema = (
 }
 
 export const getInsertSchema = (
-  module: UseModuleProps,
+  module: WithModuleProps,
   tableInfo: TableInfo
 ) => {
   const optionsInsertSchema = get(module, "graphql.createSchema", "")

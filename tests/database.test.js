@@ -2,9 +2,7 @@ require("dotenv").config()
 
 const {
   default: wertik,
-  useModule,
-  useMysqlDatabase,
-  useGraphql,
+  withMysqlDatabase,
 } = require("../lib/index")
 
 const { database } = require("./testUtils")
@@ -14,7 +12,7 @@ if (database.name) {
     await expect(
       wertik({
         database: {
-          default: useMysqlDatabase(database),
+          default: withMysqlDatabase(database),
         },
       })
     ).resolves.not.toThrowError()

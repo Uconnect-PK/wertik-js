@@ -1,4 +1,4 @@
-import { UseModuleProps } from "src/types/modules"
+import { WithModuleProps } from "src/types/modules"
 import { convertDatabaseTypeIntoGraphqlType } from "../helpers"
 import { MysqlColumnInfoDescribeTable, TableInfo } from "./../../types/database"
 
@@ -30,7 +30,7 @@ export const enumTypes = ["enum"]
 export const jsonTypes = ["json"]
 
 export const getMysqlTableInfo = async (
-  module: UseModuleProps,
+  module: WithModuleProps,
   sequelize: any
 ): Promise<TableInfo> => {
   let rows = await sequelize.query(`describe ${module.table};`)

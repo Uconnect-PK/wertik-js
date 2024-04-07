@@ -1,6 +1,6 @@
 import { iObject } from "."
 
-export interface UseMysqlDatabaseProps {
+export interface WithMysqlDatabaseProps {
   /**
    * Database name
    */

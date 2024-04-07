@@ -1,6 +1,6 @@
 import get from "lodash.get"
 import { databaseDefaultOptions } from "../utils/defaultOptions"
-import { RelationParams, UseModuleProps } from "../types/modules"
+import { RelationParams, WithModuleProps } from "../types/modules"
 import {
   getInsertSchema,
   getUpdateSchema,
@@ -19,7 +19,7 @@ import camelize from "../utils/camelize"
  * Wertik js module
  * @param props see interface UseModuleProps
  */
-export const useModule = (moduleProps: UseModuleProps) => {
+export const withModule = (moduleProps: WithModuleProps) => {
   return async ({
     store,
     configuration,

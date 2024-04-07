@@ -5,7 +5,7 @@ export interface GetMiddlewareOptionsGraphql extends GetMiddlewareOptions {
   path: string
 }
 
-export interface UseGraphqlProps {
+export interface WithApolloGraphqlProps {
   options?: {
     [key: string]: any
   }

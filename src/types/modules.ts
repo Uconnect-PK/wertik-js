@@ -39,7 +39,7 @@ export interface RelationParams {
   }
 }
 
-export interface UseModuleProps {
+export interface WithModuleProps {
   /**
    * Your module name.
    */

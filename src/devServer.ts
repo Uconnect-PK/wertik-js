@@ -1,30 +1,30 @@
 import wertik, {
-  useMysqlDatabase,
-  useGraphql,
-  useModule,
-  useWebSockets,
-  useSocketIO,
-  useIndependentWebSocketsServer,
-  useLogger,
-  useWinstonTransport,
-  useMailer,
-  useRedis,
+  withMysqlDatabase,
+  withApolloGraphql,
+  withModule,
+  withWebSockets,
+  withSocketIO,
+  withIndependentWebSocketsServer,
+  withLogger,
+  withWinstonTransport,
+  withMailer,
+  withRedis,
 } from "./index"
 
 wertik({
   port: 1200,
-  graphql: useGraphql({
+  graphql: withApolloGraphql({
     storeTypeDefFilePath: process.cwd() + "/graphqlSchema.graphql",
   }),
   database: {
-    ecommerce: useMysqlDatabase({
+    ecommerce: withMysqlDatabase({
       port: 3306,
       name: "wertik",
       host: "127.0.0.1",
       password: "pass",
       username: "root",
     }),
-    wapgee_prod: useMysqlDatabase({
+    wapgee_prod: withMysqlDatabase({
       port: 3306,
       name: "wapgee_prod",
       host: "127.0.0.1",
@@ -33,7 +33,7 @@ wertik({
     }),
   },
   modules: {
-    Product: useModule({
+    Product: withModule({
       name: "Product",
       useDatabase: true,
       database: "ecommerce",
@@ -51,7 +51,7 @@ wertik({
         })
       },
     }),
-    User: useModule({
+    User: withModule({
       name: "User",
       useDatabase: true,
       database: "ecommerce",
@@ -69,7 +69,7 @@ wertik({
         })
       },
     }),
-    // EcommerceShirts: useModule({
+    // EcommerceShirts: withModule({
     //   name: "EcommerceShirts",
     //   useDatabase: true,
     //   database: "ecommerce",
@@ -87,7 +87,7 @@ wertik({
     //     })
     //   },
     // }),
-    // EcommerceUsers: useModule({
+    // EcommerceUsers: withModule({
     //   name: "EcommerceUsers",
     //   useDatabase: true,
     //   database: "ecommerce",
@@ -105,7 +105,7 @@ wertik({
     //     })
     //   },
     // }),
-    // User: useModule({
+    // User: withModule({
     //   name: "User",
     //   useDatabase: true,
     //   table: "users",
@@ -123,7 +123,7 @@ wertik({
     //     })
     //   },
     // }),
-    // Post: useModule({
+    // Post: withModule({
     //   name: "Post",
     //   useDatabase: true,
     //   table: "post",
@@ -143,18 +143,18 @@ wertik({
     // }),
   },
   sockets: {
-    mySockets: useWebSockets({
+    mySockets: withWebSockets({
       path: "/websockets",
     }),
-    socketio: useSocketIO({
+    socketio: withSocketIO({
       path: "/mysocketioserver",
     }),
-    mySockets2: useIndependentWebSocketsServer({
+    mySockets2: withIndependentWebSocketsServer({
       port: 1500,
     }),
   },
-  logger: useLogger({
-    transports: useWinstonTransport((winston) => {
+  logger: withLogger({
+    transports: withWinstonTransport((winston) => {
       return [
         new winston.transports.File({
           filename: "info.log",
@@ -165,13 +165,13 @@ wertik({
   }),
   mailer: {
     instances: {
-      default: useMailer({
+      default: withMailer({
         name: "Default",
       }),
     },
   },
   redis: {
-    testRedis: useRedis({
+    testRedis: withRedis({
       name: "testRedis",
     }),
   },

@@ -1,5 +1,5 @@
 import { Sequelize } from "sequelize/types"
-import { UseMysqlDatabaseProps } from "./database"
+import { WithMysqlDatabaseProps } from "./database"
 import { SendEmailProps } from "./mailer"
 import { WertikModule } from "./modules"
 import { ApolloServer } from "apollo-server-express"
@@ -44,7 +44,7 @@ export interface WertikConfiguration {
   httpServer?: iObject
   /**
    * [Optional] When passed as true, Wertik will not start server.
-   * 
+   *
    * @deprecated Use `selfStart` instead.
    * @default true
    */
@@ -60,7 +60,7 @@ export interface WertikConfiguration {
    */
   database?: {
     [key: string]: () => Promise<{
-      credentials: UseMysqlDatabaseProps
+      credentials: WithMysqlDatabaseProps
       instance: Sequelize
     }>
   }
@@ -217,12 +217,12 @@ export interface WertikApp {
 /**
  * Provide same options that redis createClient method requires.
  */
-export interface UseRedisProps {
+export interface WithRedisProps {
   [key: string]: any
   name: string
 }
 
-export interface UseMailerProps {
+export interface WithMailerProps {
   /**
    * Provide name for your mailer.
    */

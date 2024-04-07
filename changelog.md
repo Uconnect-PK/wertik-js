@@ -19,6 +19,18 @@
 - Added tests to ensure GraphQL operations function correctly.
 - Introduced an option to output GraphQL type definitions in a file.
 - Change configuration prop `skip` to `selfStart` to make it more intuitive.
+- Rename `useMysqlDatabase` to `withMysqlDatabase` with its props.
+- Rename `useRedis` to `withRedis` with its props.
+- Rename `useGraphql` to `withGraphql` with its props.
+- Rename `useModule` to `withModule` with its props.
+- Rename `useMailer` to `withMailer` with its props.
+- Rename `useSocketIO` to `withSocketIO` with its props.
+- Rename `useWebSockets` to `withWebSockets` with its props.
+- Rename `useIndependentWebSocketsServer` to `withIndependentWebSocketsServer` with its props.
+- Rename `useLogger` to `withLogger` with its props.
+- Rename `useWinstonTransport` to `withWinstonTransport` with its props.
+- Rename `useQueue` to `withQueue` with its props.
+- Verified tests with Jest for renaming changes.
 
 
 ### 3.3.0

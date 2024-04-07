@@ -1,5 +1,5 @@
 import dayjs from "./../../utils/dayjs"
-import { useModule } from "../../modules/modules"
+import { withModule } from "../../modules/modules"
 import mysqldump from "mysqldump"
 import fs from "fs"
 import { wLog } from "../../utils/log"
@@ -73,7 +73,7 @@ export const WertikBackupModule = (
   table: string,
   tableOptions: any = {}
 ) =>
-  useModule({
+  withModule({
     name: "Backup",
     useDatabase: true,
     database: database,

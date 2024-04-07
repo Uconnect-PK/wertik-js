@@ -2,27 +2,27 @@ require("dotenv").config()
 
 const {
   default: wertik,
-  useModule,
-  useMysqlDatabase,
-  useGraphql,
+  withModule,
+  withMysqlDatabase,
+  withApolloGraphql,
 } = require("../lib/index")
 
 const { database, Product, User } = require("./testUtils")
 
 if (database.name) {
-  describe("Expect useMysqlDatabase, useModule and useGraphql, and expect module graphql operations work", () => {
+  describe("Expect withMysqlDatabase, withModule and withApolloGraphql, and expect module graphql operations work", () => {
     let app
     test("Expect test database to connect and does not causes error", async () => {
       await expect(
         (app = wertik({
           database: {
-            default: useMysqlDatabase(database),
+            default: withMysqlDatabase(database),
           },
           modules: {
-            Product: useModule(Product),
-            User: useModule(User),
+            Product: withModule(Product),
+            User: withModule(User),
           },
-          graphql: useGraphql(),
+          graphql: withApolloGraphql(),
         }).then((wertikApp) => {
           app = wertikApp
         }))

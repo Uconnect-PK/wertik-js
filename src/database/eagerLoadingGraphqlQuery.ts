@@ -28,13 +28,14 @@ const clean = (cleanObject) => {
 
 export const convertGraphqlRequestedFieldsIntoInclude = (
   graphqlFields = {},
-  args: any = {}
+  args: any = {},
+  module: any = {}
 ) => {
   graphqlFields = clean(graphqlFields)
-  const keys = [
-    ...store.database.relationships.map((c) => c.graphqlKey),
-    ...store.graphql.graphqlKeys,
-  ]
+  const keys = store.database.relationships
+    .filter((f) => f.currentModule == module.name)
+    .map((c) => c.graphqlKey)
+
   const requiredFilters = keys.filter((c) =>
     Object.keys(args.where ?? {}).includes(c)
   )
@@ -82,6 +83,9 @@ export const convertGraphqlRequestedFieldsIntoInclude = (
   }
 
   let include = recursion(graphqlFields)
+
+  console.log(include)
+  console.log(keys)
 
   /**
     * Make sure the include is required if filters are requested in root level filters. 

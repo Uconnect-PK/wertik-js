@@ -31,6 +31,9 @@
 - Rename `useWinstonTransport` to `withWinstonTransport` with its props.
 - Rename `useQueue` to `withQueue` with its props.
 - Verified tests with Jest for renaming changes.
+- Rename `useSchema` to `extendSchema` with its props.
+- Rename `useMutation` to `addMutation` with its props.
+- Rename `useExpress` to `getExpress`.
 
 
 ### 3.3.0

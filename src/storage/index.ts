@@ -1,11 +1,11 @@
 import { WertikApp, WertikConfiguration } from "../types"
-import { UseStorageProps } from "../types/storage"
+import { WithStorageProps } from "../types/storage"
 import { wLog } from "../utils/log"
 
 const DIGITAL_OCEAN = "digitalocean"
 const DROPBOX = "dropbox"
 
-export const useStorage = (storageItem: UseStorageProps) => {
+export const withStorage = (storageItem: WithStorageProps) => {
   return ({
     configuration,
     wertikApp,

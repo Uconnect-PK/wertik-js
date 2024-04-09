@@ -280,25 +280,25 @@ wertik({
       name: "Games",
       table: "games",
       database: "jscontainer",
-      on({ useExpress, useQuery, useMutation, useSchema }) {
+      on({ useExpress, addQuery, addMutation, extendSchema }) {
         useExpress((express) => {
           express.get("/404", (req, res) => res.status(404).send("404"));
         });
-        useQuery({
+        addQuery({
           name: "getGames",
           query: "getGames: [Games]",
           resolver() {
             return [];
           },
         });
-        useMutation({
+        addMutation({
           name: "updateAllGames",
           query: "updateAllGames: [Games]",
           resolver() {
             return [];
           },
         });
-        useSchema(`
+        extendSchema(`
             type MyType {
               id: Int
               name: String

@@ -1,7 +1,7 @@
 {
   "name": "wertik-js",
-  "version": "3.3.3",
-  "main": "lib/main.js",
+  "version": "3.4.0",
+  "main": "lib/index.js",
   "types": "lib/types.d.ts",
   "repository": "https://github.com/Uconnect-Technologies/wertik-js.git",
   "keywords": [
@@ -26,9 +26,11 @@
   "license": "MIT",
   "scripts": {
     "dev": "tsc-watch --onSuccess \"node lib/devServer.js\"",
-    "build": "yarn prettier && yarn tsc && yarn test",
+    "build": "rm -rf lib && yarn prettier && yarn tsc && yarn test",
     "prettier": "prettier --write src package.json index.js",
-    "test": "cross-env TEST_MODE=true jest --runInBand --forceExit --detectOpenHandles"
+    "test": "cross-env TEST_MODE=true jest --runInBand --forceExit --detectOpenHandles",
+    "preinstall": "rm -rf node_modules",
+    "prepare": "yarn tsc"
   },
   "pre-commit": [
     "prettier"

@@ -48,13 +48,13 @@ export const withModule = (moduleProps: WithModuleProps) => {
       )
     }
 
-    const useSchema = (string: string) => {
+    const extendSchema = (string: string) => {
       store.graphql.typeDefs = store.graphql.typeDefs.concat(`
         ${string}
       `)
     }
 
-    const useQuery = ({ query, resolver, name }) => {
+    const addQuery = ({ query, resolver, name }) => {
       store.graphql.typeDefs = store.graphql.typeDefs.concat(`
         extend type Query {
           ${query}
@@ -63,7 +63,7 @@ export const withModule = (moduleProps: WithModuleProps) => {
       store.graphql.resolvers.Query[name] = resolver
     }
 
-    const useMutation = ({ query, resolver, name }) => {
+    const addMutation = ({ query, resolver, name }) => {
       store.graphql.typeDefs = store.graphql.typeDefs.concat(`
         extend type Mutation {
           ${query}
@@ -72,7 +72,7 @@ export const withModule = (moduleProps: WithModuleProps) => {
       store.graphql.resolvers.Mutation[name] = resolver
     }
 
-    const useExpress = (fn = (express) => {}) => {
+    const getExpress = (fn = (express) => {}) => {
       setTimeout(() => {
         fn(app.express)
       }, 2500)
@@ -171,14 +171,14 @@ export const withModule = (moduleProps: WithModuleProps) => {
       )
     }
     get(moduleProps, "on", () => {})({
-      useQuery,
-      useMutation,
-      useExpress,
+      addQuery,
+      addMutation,
+      getExpress,
       hasOne,
       belongsTo,
       belongsToMany,
       hasMany,
-      useSchema,
+      extendSchema,
     })
 
     let insertSchema = []

@@ -79,15 +79,15 @@ export const WertikBackupModule = (
     database: database,
     table: table,
     tableOptions: tableOptions,
-    on: function ({ useSchema, useMutation }) {
-      useSchema(`
+    on: function ({ extendSchema, addMutation }) {
+      extendSchema(`
       type BackupSuccessResponse {
         message: String
         filename: String
-        backup: Backup
+        backup: BackupModule
       }
     `)
-      useMutation({
+      addMutation({
         name: "backupLocal",
         query: "backupLocal(database: [String]!): [BackupSuccessResponse]",
         async resolver(_, args, context) {
@@ -108,7 +108,7 @@ export const WertikBackupModule = (
           return push
         },
       })
-      useMutation({
+      addMutation({
         name: "backupDigitalOceanSpaces",
         query:
           "backupDigitalOceanSpaces(ACL: String!, Bucket: String!, storage: String!, database: [String]!): [BackupSuccessResponse]",
@@ -152,7 +152,7 @@ export const WertikBackupModule = (
           }
         },
       })
-      useMutation({
+      addMutation({
         name: "backupDropbox",
         query:
           "backupDropbox(storage: String!, database: [String]): [BackupSuccessResponse]",

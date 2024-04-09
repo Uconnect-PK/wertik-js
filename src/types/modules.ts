@@ -1,7 +1,7 @@
 import { iObject } from "."
 import { ModelStatic, Model } from "sequelize/types"
 
-export interface UseQueryProps {
+export interface AddQueryProps {
   /**
    * Schema for this query, for example: getUsers: [Users]
    */
@@ -15,7 +15,7 @@ export interface UseQueryProps {
    */
   name: string
 }
-export interface UseMutationProps {
+export interface AddMutationProps {
   /**
    * Schema for this query, for example: deleteUsers: Boolean
    */
@@ -29,7 +29,7 @@ export interface UseMutationProps {
    */
   name: string
 }
-export type useExpressProps = Function
+export type GetExpressProps = Function
 export interface RelationParams {
   module: string
   graphqlKey: string
@@ -109,15 +109,15 @@ export interface WithModuleProps {
     /**
      * This Method allows you adding graphql query to your module.
      */
-    useQuery: (props: UseQueryProps) => {} | void
+    addQuery: (props: AddQueryProps) => {} | void
     /**
      * This Method allows you adding graphql mutation to your module.
      */
-    useMutation: (props: UseMutationProps) => {} | void
+    addMutation: (props: AddMutationProps) => {} | void
     /**
      * This method gives you access to express app instance.
      */
-    useExpress: (express: any) => void
+    getExpress: (express: any) => void
     /**
      * This method adds a one-to-one relationship to a module.
      */
@@ -137,7 +137,7 @@ export interface WithModuleProps {
     /**
      * This method adds has many relationship to a module.
      */
-    useSchema: (props: string) => {} | void
+    extendSchema: (props: string) => {} | void
   }) => void
   /**
    * Graphql events when a CRUD operation happens.

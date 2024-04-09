@@ -1,4 +1,4 @@
-export interface UseStorageProps {
+export interface WithStorageProps {
   for: "dropbox" | "digitalocean"
   name: string
   dropboxOptions?: {

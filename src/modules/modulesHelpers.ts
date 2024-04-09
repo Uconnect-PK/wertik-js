@@ -171,5 +171,9 @@ export const generateRowFieldNameForModuleName = (moduleName) => {
   return snackCase(pluralize.singular(moduleName)).toLowerCase()
 }
 export const generateRowsFieldNameForModuleName = (moduleName) => {
-  return snackCase(pluralize.plural(moduleName)).toLowerCase()
+  let fieldName = snackCase(pluralize.plural(moduleName)).toLowerCase()
+  if (generateRowFieldNameForModuleName(moduleName) == fieldName) {
+    return fieldName + "s"
+  }
+  return fieldName
 }

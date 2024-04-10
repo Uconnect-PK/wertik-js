@@ -6,6 +6,11 @@ export default `
 	scalar JSON
 	scalar JSONObject
 
+	enum order_by {
+		ASC
+		DESC
+	}
+
 	input string_filter_input {
 		_eq: String
 		_ne: String

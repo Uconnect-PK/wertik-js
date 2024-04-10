@@ -31,10 +31,14 @@ export const convertGraphqlRequestedFieldsIntoInclude = (
   args: any = {},
   module: any = {}
 ) => {
+  let order = [];
+  let depth = []
   graphqlFields = clean(graphqlFields)
   const keys = store.database.relationships
     .filter((f) => f.currentModule == module.name)
     .map((c) => c.graphqlKey)
+
+  const allRelationshipKeys = store.database.relationships.map((c) => c.graphqlKey)
 
   const requiredFilters = keys.filter((c) =>
     Object.keys(args.where ?? {}).includes(c)
@@ -44,7 +48,7 @@ export const convertGraphqlRequestedFieldsIntoInclude = (
     let includes = []
 
     for (const key in _obj) {
-      if (keys.includes(key)) {
+      if (allRelationshipKeys.includes(key)) {
         const includeParams: { [key: string]: any } = {
           required: false,
           model:
@@ -60,10 +64,16 @@ export const convertGraphqlRequestedFieldsIntoInclude = (
 
         let __arguments = get(_obj, `[${key}].__arguments`, [])
         let __whereInArguments = __arguments.find((c) => has(c, "where"))
+        let __orderInArguments = __arguments.find((c) => has(c, "order"))
         let __limitInArguments = __arguments.find((c) => has(c, "limit"))
         let __offsetInArguments = __arguments.find((c) => has(c, "offset"))
         __limitInArguments = get(__limitInArguments, "limit.value", null)
         __offsetInArguments = get(__offsetInArguments, "offset.value", null)
+        __orderInArguments = get(__orderInArguments, "order.value", null)
+
+        if (__orderInArguments) {
+          order.push([...depth, key, __orderInArguments])
+        }
 
         if (__whereInArguments) {
           __whereInArguments = get(__whereInArguments, "where.value", {})
@@ -75,7 +85,6 @@ export const convertGraphqlRequestedFieldsIntoInclude = (
 
         if (__limitInArguments) includeParams.limit = __limitInArguments
         if (__offsetInArguments) includeParams.offset = __offsetInArguments
-
         includes.push(includeParams)
       }
     }
@@ -83,10 +92,6 @@ export const convertGraphqlRequestedFieldsIntoInclude = (
   }
 
   let include = recursion(graphqlFields)
-
-  console.log(include)
-  console.log(keys)
-
   /**
     * Make sure the include is required if filters are requested in root level filters. 
     * If root level filters are not met then the response will be null.
@@ -107,5 +112,8 @@ export const convertGraphqlRequestedFieldsIntoInclude = (
     return c
   })
 
-  return include
+  return {
+    include,
+    order,
+  }
 }

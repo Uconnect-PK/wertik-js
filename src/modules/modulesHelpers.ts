@@ -6,6 +6,8 @@ import crud from "../crud"
 import store from "../store"
 import pluralize from "pluralize"
 import snackCase from "lodash.snakecase"
+import isPlainObject from "lodash.isplainobject"
+import { print } from "util"
 
 export const generateDataTypeFromDescribeTableColumnType = (Type: string) => {
   let length = Type.match(/[0-9]/g)?.join("")
@@ -101,6 +103,22 @@ export const getInsertSchema = (
   return insertSchema.join("\n")
 }
 
+export const getOrderSchema = (module: WithModuleProps, tableInfo) => {
+  let orderSchema = [
+    `input ${generateRowFieldNameForModuleName(module.name)}_order_input {`,
+  ]
+  let relationships = store.database.relationships.filter(
+    (c) => c.currentModule === module.name
+  )
+  tableInfo.columns.forEach((column) => {
+    orderSchema.push(`${column.columnName}: order_by`)
+  })
+
+  orderSchema.push("}")
+
+  return orderSchema.join("\n")
+}
+
 export const generateEnumTypeForGraphql = (column: TableInfo["columns"][0]) => {
   return `enum ${column.graphqlType} {
     ${column.enumValues.join("\n")}
@@ -120,6 +138,7 @@ export const generateGenerateGraphQLCrud = (
     \n ${schemaInformation.inputSchema.filters}
     \n ${schemaInformation.inputSchema.insert}
     \n ${schemaInformation.inputSchema.update}
+    \n ${schemaInformation.inputSchema.order_schema}
     `
   )
 
@@ -176,4 +195,30 @@ export const generateRowsFieldNameForModuleName = (moduleName) => {
     return fieldName + "s"
   }
   return fieldName
+}
+
+export const generateOrderByForModule = (module, order) => {
+  const final_order = [];
+  const currentModuleRelationships = store.database.relationships
+    .filter((c) => c.currentModule === module.name)
+    .map((c) => {
+      return c.options.as
+    })
+
+  order.forEach(element => {
+    element.forEach(sub_element => {
+      if (isPlainObject(sub_element)) {
+        Object.keys(sub_element).forEach(key => {
+          final_order.push([
+            ...element.filter((c) => !isPlainObject(c)),
+            key,
+            sub_element[key]
+          ])
+        })
+      }
+    });
+  });
+
+
+  return final_order
 }

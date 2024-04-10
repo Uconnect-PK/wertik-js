@@ -2,6 +2,7 @@ import get from "lodash.get"
 import { wLogWithDateWithInfo } from "../utils/log"
 import { convertGraphqlRequestedFieldsIntoInclude } from "../database/eagerLoadingGraphqlQuery"
 import {
+  generateOrderByForModule,
   generateRequestedFieldsFromGraphqlInfo,
   generateRowFieldNameForModuleName,
   generateRowsFieldNameForModuleName,
@@ -23,7 +24,6 @@ export default function (module, schemaInformation, store) {
         type ${module.name}List {
             rows: [${module.name}Module]
             pagination: Pagination
-            sorting: Sorting
             paginationProperties: PaginationProperties @deprecated(reason: "Use pagination instead")
         }
         type ${module.name}BulkMutationResponse {
@@ -36,7 +36,7 @@ export default function (module, schemaInformation, store) {
 
         extend type Query {
             ${singleRowFieldName}(where: ${singleRowFieldName}_filter_input): ${module.name}Module
-            ${rowsFieldName}(pagination: PaginationInput, where: ${singleRowFieldName}_filter_input, sorting: [SortingInput]): ${module.name}List
+            ${rowsFieldName}(pagination: PaginationInput, where: ${singleRowFieldName}_filter_input, order: ${generateRowFieldNameForModuleName(module.name)}_order_input): ${module.name}List
             count${module.name}(where: ${singleRowFieldName}_filter_input):  Int
         }`
       },
@@ -230,19 +230,22 @@ export default function (module, schemaInformation, store) {
                 )(_, args, context, info)
                 args = argsFromEvent ? argsFromEvent : args
 
+                const convertFieldsIntoInclude = convertGraphqlRequestedFieldsIntoInclude(
+                  graphqlFields(info, {}, { processArguments: true }),
+                  args,
+                  module
+                )
+
                 return await paginate(
                   args,
                   schemaInformation.tableInstance,
-                  convertGraphqlRequestedFieldsIntoInclude(
-                    graphqlFields(info, {}, { processArguments: true }),
-                    args,
-                    module
-                  ),
+                  convertFieldsIntoInclude.include,
                   {
                     attributes: generateRequestedFieldsFromGraphqlInfo(
                       graphqlFields(info).rows
                     ),
-                  }
+                  },
+                  generateOrderByForModule(module, [[args.order], ...convertFieldsIntoInclude.order],)
                 )
               }
             ),

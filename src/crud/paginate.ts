@@ -1,15 +1,16 @@
 import store from "../store"
 import convertFiltersIntoSequelizeObject from "../utils/convertFiltersIntoSequelizeObject"
 import omit from "lodash.omit"
+import isPlainObject from "lodash.isplainobject"
 
 export const paginate = async (
   arg,
   tableInstance,
   includes: any[] = [],
-  queryOptions: { [key: string]: any } = {}
+  queryOptions: { [key: string]: any } = {},
+  order = []
 ) => {
   const { page = 1, limit = 100 } = arg.pagination ?? {}
-  const sorting = arg.sorting ?? []
   const offset = limit * (page - 1)
   const keys = [
     ...store.database.relationships.map((c) => c.graphqlKey),
@@ -21,7 +22,7 @@ export const paginate = async (
     where,
     offset,
     limit,
-    order: sorting.map(({ column, type }) => [column, type]),
+    order,
     include: includes,
     ...queryOptions,
   })

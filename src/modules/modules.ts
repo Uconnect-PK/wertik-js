@@ -8,6 +8,7 @@ import {
   generateGenerateGraphQLCrud,
   generateRowsFieldNameForModuleName,
   generateRowFieldNameForModuleName,
+  getOrderSchema,
 } from "./modulesHelpers"
 import { getMysqlTableInfo } from "../database/mysql/getTableInfo"
 import { Store, WertikApp, WertikConfiguration } from "./../types/index"
@@ -38,6 +39,7 @@ export const withModule = (moduleProps: WithModuleProps) => {
         moduleProps.name
       )}_filter_input {`,
     ]
+    let orderSchema = ""
 
     const useDatabase = get(moduleProps, "useDatabase", false)
 
@@ -119,12 +121,11 @@ export const withModule = (moduleProps: WithModuleProps) => {
       )
     }
     const belongsToMany = (params: RelationParams) => {
+      let field_name = generateRowFieldNameForModuleName(params.module)
       graphqlSchema.push(
         `${
           params.graphqlKey
-        }(offset: Int, limit: Int, where: ${generateRowFieldNameForModuleName(
-          params.module
-        )}_filter_input, sorting: [SortingInput]): [${params.module}Module]`
+        }(offset: Int, limit: Int, where: ${field_name}_filter_input, order: ${field_name}_order_input): [${params.module}Module]`
       )
       let relationshipInfo = {
         currentModule: moduleProps.name,
@@ -145,12 +146,11 @@ export const withModule = (moduleProps: WithModuleProps) => {
       )
     }
     const hasMany = (params: RelationParams) => {
+      let field_name = generateRowFieldNameForModuleName(params.module)
       graphqlSchema.push(
         `${
           params.graphqlKey
-        }(offset: Int, limit: Int, where: ${generateRowFieldNameForModuleName(
-          params.module
-        )}_filter_input, sorting: [SortingInput]): [${params.module}Module]`
+        }(offset: Int, limit: Int, where: ${field_name}_filter_input, order: ${field_name}_order_input): [${params.module}Module]`
       )
       let relationshipInfo = {
         currentModule: moduleProps.name,
@@ -236,6 +236,8 @@ export const withModule = (moduleProps: WithModuleProps) => {
 
       insertSchema = getInsertSchema(moduleProps, tableInfo)
 
+      orderSchema = getOrderSchema(moduleProps, tableInfo)
+
       tableInfo.columns.forEach((column) => {
         let filter_input =
           column.databaseType.toLowerCase() === "enum"
@@ -268,6 +270,7 @@ export const withModule = (moduleProps: WithModuleProps) => {
         update: updateSchema || "",
         list: listSchema,
         filters: filterSchema.join("\n"),
+        order_schema: orderSchema || "",
       },
     }
 

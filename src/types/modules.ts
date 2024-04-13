@@ -182,6 +182,6 @@ export interface WertikModule {
     update: string | any[]
     list: string
     filters: string
-  },
+  }
   props: WithModuleProps
 }

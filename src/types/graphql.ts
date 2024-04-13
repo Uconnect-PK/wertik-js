@@ -16,6 +16,9 @@ export interface WithApolloGraphqlProps {
   }
   typeDefs?: string
   storeTypeDefFilePath?: string
+  validation?: {
+    depthLimit?: number
+  }
 }
 
 export interface GraphqlInitializeProps {

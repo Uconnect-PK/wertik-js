@@ -21,7 +21,7 @@ export interface Store {
   }
   database: {
     relationships: Array<iObject>
-  },
+  }
   modules: WithModuleProps[]
 }
 

@@ -31,8 +31,8 @@ export const convertGraphqlRequestedFieldsIntoInclude = (
   args: any = {},
   module: any = {}
 ) => {
-  let order = [];
-  let depth = [];
+  let order = []
+  let depth = []
   graphqlFields = clean(graphqlFields)
   const currentModuleRelationships = store.database.relationships.filter(
     (f) => f.currentModule == module.name
@@ -48,7 +48,6 @@ export const convertGraphqlRequestedFieldsIntoInclude = (
   const requiredFilters = currentModuleRelationshipsKeys.filter((c) =>
     Object.keys(args.where ?? {}).includes(c)
   )
-
 
   Object.keys(args.order ?? {}).forEach((element) => {
     order.push([element, args.order[element]])

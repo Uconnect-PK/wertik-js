@@ -17,16 +17,9 @@ wertik({
     storeTypeDefFilePath: process.cwd() + "/graphqlSchema.graphql",
   }),
   database: {
-    ecommerce: withMysqlDatabase({
+    wertik: withMysqlDatabase({
       port: 3306,
-      name: "wertik",
-      host: "127.0.0.1",
-      password: "pass",
-      username: "root",
-    }),
-    wapgee_prod: withMysqlDatabase({
-      port: 3306,
-      name: "wapgee_prod",
+      name: "wertik_test",
       host: "127.0.0.1",
       password: "pass",
       username: "root",
@@ -36,11 +29,11 @@ wertik({
     Product: withModule({
       name: "Product",
       useDatabase: true,
-      database: "ecommerce",
+      database: "wertik",
       table: "product",
       on: function ({ belongsTo }) {
         belongsTo({
-          database: "ecommerce",
+          database: "wertik",
           graphqlKey: "user",
           module: "User",
           options: {
@@ -54,11 +47,11 @@ wertik({
     User: withModule({
       name: "User",
       useDatabase: true,
-      database: "ecommerce",
+      database: "wertik",
       table: "user",
       on: function ({ hasMany }) {
         hasMany({
-          database: "ecommerce",
+          database: "wertik",
           graphqlKey: "products",
           module: "Product",
           options: {
@@ -69,78 +62,12 @@ wertik({
         })
       },
     }),
-    // EcommerceShirts: withModule({
-    //   name: "EcommerceShirts",
-    //   useDatabase: true,
-    //   database: "ecommerce",
-    //   table: "shirts",
-    //   on: function ({ belongsTo }) {
-    //     belongsTo({
-    //       database: "ecommerce",
-    //       graphqlKey: "user",
-    //       module: "EcommerceUsers",
-    //       options: {
-    //         as: "user",
-    //         foreignKey: "user_id",
-    //         targetKey: "id",
-    //       },
-    //     })
-    //   },
-    // }),
-    // EcommerceUsers: withModule({
-    //   name: "EcommerceUsers",
-    //   useDatabase: true,
-    //   database: "ecommerce",
-    //   table: "users",
-    //   on: function ({ hasMany }) {
-    //     hasMany({
-    //       database: "ecommerce",
-    //       graphqlKey: "shirts",
-    //       module: "EcommerceShirts",
-    //       options: {
-    //         as: "shirts",
-    //         foreignKey: "user_id",
-    //         sourceKey: "id",
-    //       },
-    //     })
-    //   },
-    // }),
-    // User: withModule({
-    //   name: "User",
-    //   useDatabase: true,
-    //   table: "users",
-    //   database: "wapgee_prod",
-    //   on: function ({ hasMany }) {
-    //     hasMany({
-    //       database: "wapgee_prod",
-    //       graphqlKey: "posts",
-    //       module: "Post",
-    //       options: {
-    //         as: "posts",
-    //         foreignKey: "created_by",
-    //         sourceKey: "id",
-    //       },
-    //     })
-    //   },
-    // }),
-    // Post: withModule({
-    //   name: "Post",
-    //   useDatabase: true,
-    //   table: "post",
-    //   database: "wapgee_prod",
-    //   on: function ({ hasOne }) {
-    //     hasOne({
-    //       module: "User",
-    //       graphqlKey: "author",
-    //       database: "default",
-    //       options: {
-    //         as: "author",
-    //         sourceKey: "created_by",
-    //         foreignKey: "id",
-    //       },
-    //     })
-    //   },
-    // }),
+    Category: withModule({
+      name: "Category",
+      useDatabase: true,
+      database: "wertik",
+      table: "category",
+    }),
   },
   sockets: {
     mySockets: withWebSockets({

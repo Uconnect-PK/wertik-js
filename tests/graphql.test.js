@@ -38,9 +38,9 @@ if (database.name) {
           mutation {
           insert_products(input: {
             sizes: lg
-            user_id: 1
+            user_id: 120
             title: "My first product"
-            category_id: 1
+            category_id: 50
           }) {
             returning {
               id
@@ -68,9 +68,7 @@ if (database.name) {
             }        
         `,
       })
-      expect(updatedItem.data.update_products.returning[0].id).toBeGreaterThan(
-        0
-      )
+      expect(updatedItem.data.update_products.returning[0].id).toBeGreaterThan(0)
       expect(updatedItem.data.update_products.returning[0].sizes).toBe("xxxl")
     })
     // view
@@ -88,7 +86,7 @@ if (database.name) {
       })
       expect(viewItem.data.product.sizes).toBe("xxxl")
     })
-    // deleted
+    // delete
     test("Expect graphql to delete data", async () => {
       let deletedItem = await app.graphql.executeOperation({
         query: `
@@ -125,7 +123,7 @@ if (database.name) {
       let viewItem = await app.graphql.executeOperation({
         query: `
             query {
-              user(where: { id: { _eq: 1 } }) {
+              user(where: { id: { _eq: 122 } }) {
                 id
                 name
                 products {

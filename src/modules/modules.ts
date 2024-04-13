@@ -20,6 +20,7 @@ import {
   wLogWithWarn,
 } from "../utils/log"
 import camelize from "../utils/camelize"
+import has from "lodash.has"
 
 /**
  * Wertik js module
@@ -187,6 +188,14 @@ export const withModule = (moduleProps: WithModuleProps) => {
     let updateSchema = []
 
     if (useDatabase) {
+      if (!has(app.database, moduleProps.database)) {
+        wLogWithError(
+          `Unknown database: ${moduleProps.database}`,
+          `Unknown database mentioned in module ${moduleProps.name}`
+        )
+        process.exit()
+      }
+
       const connection = app.database[moduleProps.database]
       // info
       const tableInfo = await getMysqlTableInfo(

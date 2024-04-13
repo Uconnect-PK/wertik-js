@@ -34,8 +34,12 @@ export default function (module, schemaInformation, store) {
         }
 
         extend type Query {
-            ${singleRowFieldName}(where: ${singleRowFieldName}_filter_input): ${module.name}Module
-            ${rowsFieldName}(pagination: PaginationInput, where: ${singleRowFieldName}_filter_input, order: ${generateRowFieldNameForModuleName(module.name)}_order_input): ${module.name}List
+            ${singleRowFieldName}(where: ${singleRowFieldName}_filter_input): ${
+          module.name
+        }Module
+            ${rowsFieldName}(pagination: PaginationInput, where: ${singleRowFieldName}_filter_input, order: ${generateRowFieldNameForModuleName(
+          module.name
+        )}_order_input): ${module.name}List
             count${module.name}(where: ${singleRowFieldName}_filter_input):  Int
         }`
       },
@@ -199,16 +203,20 @@ export default function (module, schemaInformation, store) {
                   args.where
                 )
 
+                const convertFieldsIntoInclude =
+                  convertGraphqlRequestedFieldsIntoInclude(
+                    graphqlFields(info, {}, { processArguments: true }),
+                    args,
+                    module
+                  )
+
                 const find = await schemaInformation.tableInstance.findOne({
                   where: omit(where, keys),
                   attributes: generateRequestedFieldsFromGraphqlInfo(
                     graphqlFields(info)
                   ),
-                  include: convertGraphqlRequestedFieldsIntoInclude(
-                    graphqlFields(info, {}, { processArguments: true }),
-                    args,
-                    module
-                  ),
+                  include: convertFieldsIntoInclude.include,
+                  order: convertFieldsIntoInclude.order,
                 })
 
                 return find
@@ -229,11 +237,12 @@ export default function (module, schemaInformation, store) {
                 )(_, args, context, info)
                 args = argsFromEvent ? argsFromEvent : args
 
-                const convertFieldsIntoInclude = convertGraphqlRequestedFieldsIntoInclude(
-                  graphqlFields(info, {}, { processArguments: true }),
-                  args,
-                  module
-                )
+                const convertFieldsIntoInclude =
+                  convertGraphqlRequestedFieldsIntoInclude(
+                    graphqlFields(info, {}, { processArguments: true }),
+                    args,
+                    module
+                  )
 
                 return await paginate(
                   args,
@@ -244,7 +253,7 @@ export default function (module, schemaInformation, store) {
                       graphqlFields(info).rows
                     ),
                   },
-                  convertFieldsIntoInclude.order,
+                  convertFieldsIntoInclude.order
                 )
               }
             ),
@@ -271,11 +280,6 @@ export default function (module, schemaInformation, store) {
                 ]
                 const count = await schemaInformation.tableInstance.count({
                   where: omit(where, keys),
-                  include: convertGraphqlRequestedFieldsIntoInclude(
-                    graphqlFields(info, {}, { processArguments: true }),
-                    args,
-                    module
-                  ),
                 })
                 return count
               }

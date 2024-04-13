@@ -1,14 +1,15 @@
+import fs from "fs"
 import get from "lodash.get"
 import omit from "lodash.omit"
 import { defaultApolloGraphqlOptions } from "../utils/defaultOptions"
 import { ApolloServer } from "apollo-server-express"
+import graphqlDepthLimit from "graphql-depth-limit"
+
 import {
   WithApolloGraphqlProps,
   GraphqlInitializeProps,
 } from "../types/graphql"
 import { wLogWithSuccess } from "../utils/log"
-import fs from "fs"
-import path from "path"
 
 export const withApolloGraphql = (props?: WithApolloGraphqlProps) => {
   return ({
@@ -17,6 +18,7 @@ export const withApolloGraphql = (props?: WithApolloGraphqlProps) => {
     store,
     configuration,
   }: GraphqlInitializeProps) => {
+    const depthLimit = get(props, "validation.depthLimit", 7)
     props = props ? props : {}
     store.graphql.typeDefs = store.graphql.typeDefs.concat(
       get(configuration, "graphql.typeDefs", "")
@@ -57,6 +59,7 @@ export const withApolloGraphql = (props?: WithApolloGraphqlProps) => {
           ...contextFromOptions,
         }
       },
+      validationRules: [graphqlDepthLimit(depthLimit)],
     })
 
     GraphqlApolloServer.applyMiddleware({

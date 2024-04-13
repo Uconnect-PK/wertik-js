@@ -21,5 +21,9 @@ export const wLogWithError = (info, ...params) => {
 }
 
 export const wLogWithSuccess = (info, ...params) => {
-  console.log(chalk.greenBright(info), ...params)
+  console.log(chalk.green(info), ...params)
+}
+
+export const wLogWithWarn = (info, ...params) => {
+  console.log(chalk.bgYellow.bold("WARN"), info, ...params)
 }

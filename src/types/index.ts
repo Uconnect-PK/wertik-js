@@ -1,7 +1,7 @@
 import { Sequelize } from "sequelize/types"
 import { WithMysqlDatabaseProps } from "./database"
 import { SendEmailProps } from "./mailer"
-import { WertikModule } from "./modules"
+import { WertikModule, WithModuleProps } from "./modules"
 import { ApolloServer } from "apollo-server-express"
 
 export type iObject = { [key: string]: any }
@@ -21,7 +21,8 @@ export interface Store {
   }
   database: {
     relationships: Array<iObject>
-  }
+  },
+  modules: WithModuleProps[]
 }
 
 export interface WertikConfiguration {

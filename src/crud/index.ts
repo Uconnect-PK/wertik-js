@@ -2,7 +2,6 @@ import get from "lodash.get"
 import { wLogWithDateWithInfo } from "../utils/log"
 import { convertGraphqlRequestedFieldsIntoInclude } from "../database/eagerLoadingGraphqlQuery"
 import {
-  generateOrderByForModule,
   generateRequestedFieldsFromGraphqlInfo,
   generateRowFieldNameForModuleName,
   generateRowsFieldNameForModuleName,
@@ -245,7 +244,7 @@ export default function (module, schemaInformation, store) {
                       graphqlFields(info).rows
                     ),
                   },
-                  generateOrderByForModule(module, [[args.order], ...convertFieldsIntoInclude.order],)
+                  convertFieldsIntoInclude.order,
                 )
               }
             ),

@@ -163,13 +163,13 @@ wertik({
       ]
     }),
   }),
-  mailer: {
-    instances: {
-      default: withMailer({
-        name: "Default",
-      }),
-    },
-  },
+  // mailer: {
+  //   instances: {
+  //     default: withMailer({
+  //       name: "Default",
+  //     }),
+  //   },
+  // },
   redis: {
     testRedis: withRedis({
       name: "testRedis",

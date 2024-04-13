@@ -7,6 +7,7 @@ import http from "http"
 import { WertikConfiguration, WertikApp } from "./types"
 import { initializeBullBoard } from "./queue/index"
 import { wLogWithInfo, wLogWithSuccess } from "./utils/log"
+import { validateModules } from "./modules/modules"
 
 export * from "./database/database"
 export * from "./modules/modules"
@@ -163,6 +164,8 @@ const Wertik: (configuration?: WertikConfiguration) => Promise<WertikApp> = (
         req.wertik = wertikApp
         next()
       })
+
+      validateModules(wertikApp)
 
       let startServer = () => {
         httpServer.listen(port, () => {

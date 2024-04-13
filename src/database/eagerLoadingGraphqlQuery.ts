@@ -32,30 +32,42 @@ export const convertGraphqlRequestedFieldsIntoInclude = (
   module: any = {}
 ) => {
   let order = [];
-  let depth = []
+  let depth = [];
   graphqlFields = clean(graphqlFields)
-  const keys = store.database.relationships
-    .filter((f) => f.currentModule == module.name)
-    .map((c) => c.graphqlKey)
+  const currentModuleRelationships = store.database.relationships.filter(
+    (f) => f.currentModule == module.name
+  )
 
-  const allRelationshipKeys = store.database.relationships.map((c) => c.graphqlKey)
+  const currentModuleRelationshipsKeys = currentModuleRelationships.map(
+    (c) => c.graphqlKey
+  )
+  const allRelationshipKeys = store.database.relationships.map(
+    (c) => c.graphqlKey
+  )
 
-  const requiredFilters = keys.filter((c) =>
+  const requiredFilters = currentModuleRelationshipsKeys.filter((c) =>
     Object.keys(args.where ?? {}).includes(c)
   )
+
+
+  Object.keys(args.order ?? {}).forEach((element) => {
+    order.push([element, args.order[element]])
+  })
 
   let recursion = (_obj) => {
     let includes = []
 
-    for (const key in _obj) {
+    Object.keys(_obj).forEach((key) => {
       if (allRelationshipKeys.includes(key)) {
+        depth.push(key)
+        let _localDepth = [...JSON.parse(JSON.stringify(depth))]
+        const relationship = store.database.relationships.find(
+          (c) => c.graphqlKey === key
+        )
+        const sequelizeModel = wertikApp.models[relationship.referencedModule]
         const includeParams: { [key: string]: any } = {
           required: false,
-          model:
-            wertikApp.models[
-              store.database.relationships.find((c) => c.graphqlKey === key)
-                .referencedModule
-            ],
+          model: sequelizeModel,
           as: key,
           attributes: generateRequestedFieldsFromGraphqlInfo(_obj[key]),
           include:
@@ -71,8 +83,10 @@ export const convertGraphqlRequestedFieldsIntoInclude = (
         __offsetInArguments = get(__offsetInArguments, "offset.value", null)
         __orderInArguments = get(__orderInArguments, "order.value", null)
 
-        if (__orderInArguments) {
-          order.push([...depth, key, __orderInArguments])
+        if (isPlainObject(__orderInArguments)) {
+          Object.keys(__orderInArguments).forEach((element) => {
+            order.push([..._localDepth, element, __orderInArguments[element]])
+          })
         }
 
         if (__whereInArguments) {
@@ -87,20 +101,20 @@ export const convertGraphqlRequestedFieldsIntoInclude = (
         if (__offsetInArguments) includeParams.offset = __offsetInArguments
         includes.push(includeParams)
       }
-    }
+    })
     return includes
   }
 
   let include = recursion(graphqlFields)
   /**
-    * Make sure the include is required if filters are requested in root level filters. 
+    * Make sure the include is required if filters are requested in root level filters.
     * If root level filters are not met then the response will be null.
     * In below graphql query, it will return if user has id 2 and written a post which id is 132, if id is not found then whole response will be null.
     query viewUser {
       viewUser(where: { id: { _eq: 2 }, posts: { id: { _eq: 123 } } }) {
         id
         name
-      } 
+      }
     }
   */
   include = include.map((c) => {

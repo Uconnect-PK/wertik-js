@@ -196,29 +196,3 @@ export const generateRowsFieldNameForModuleName = (moduleName) => {
   }
   return fieldName
 }
-
-export const generateOrderByForModule = (module, order) => {
-  const final_order = [];
-  const currentModuleRelationships = store.database.relationships
-    .filter((c) => c.currentModule === module.name)
-    .map((c) => {
-      return c.options.as
-    })
-
-  order.forEach(element => {
-    element.forEach(sub_element => {
-      if (isPlainObject(sub_element)) {
-        Object.keys(sub_element).forEach(key => {
-          final_order.push([
-            ...element.filter((c) => !isPlainObject(c)),
-            key,
-            sub_element[key]
-          ])
-        })
-      }
-    });
-  });
-
-
-  return final_order
-}

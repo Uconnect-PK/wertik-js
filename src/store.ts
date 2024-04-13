@@ -1,5 +1,18 @@
 import generalSchema from "./graphql/generalSchema"
 import { WertikApp } from "./types"
+import { WithModuleProps } from "./types/modules"
+
+
+type StoreDatabaseRelationship = {
+  currentModule: string,
+  currentModuleDatabase: string,
+  graphqlKey: string,
+  referencedModule: string,
+  referencedModuleDatabase: string,
+  options: {
+    [key: string]: unknown
+  }
+}
 
 /**
  * @description This is the store of the app. It contains all the data that is required by the app to run.
@@ -38,16 +51,17 @@ const store: {
         [key: string]: Function
       }
       [key: string]: {
-        [key: string]: Function
+        [key: string]: Function | string | number | boolean | object | any
       }
     }
   }
   database: {
-    relationships: any[]
+    relationships: StoreDatabaseRelationship[]
     models: {
       [key: string]: any
     }
-  }
+  },
+  modules: WithModuleProps[]
 } = {
   graphql: {
     graphqlKeys: [],
@@ -81,6 +95,7 @@ const store: {
     relationships: [],
     models: {},
   },
+  modules: []
 }
 
 export default store

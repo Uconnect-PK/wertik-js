@@ -13,7 +13,12 @@ import {
 import { getMysqlTableInfo } from "../database/mysql/getTableInfo"
 import { Store, WertikApp, WertikConfiguration } from "./../types/index"
 import { ModelStatic, Model, ModelAttributes } from "sequelize/types"
-import { wLogWithInfo } from "../utils/log"
+import {
+  wLogWithError,
+  wLogWithInfo,
+  wLogWithSuccess,
+  wLogWithWarn,
+} from "../utils/log"
 import camelize from "../utils/camelize"
 
 /**
@@ -30,6 +35,7 @@ export const withModule = (moduleProps: WithModuleProps) => {
     configuration: WertikConfiguration
     app: WertikApp
   }) => {
+    store.modules.push(moduleProps)
     let currentModuleRelationships = []
     let tableInstance: ModelStatic<Model<any, any>>
     let graphqlSchema = [`type ${moduleProps.name}Module {`]
@@ -123,9 +129,7 @@ export const withModule = (moduleProps: WithModuleProps) => {
     const belongsToMany = (params: RelationParams) => {
       let field_name = generateRowFieldNameForModuleName(params.module)
       graphqlSchema.push(
-        `${
-          params.graphqlKey
-        }(offset: Int, limit: Int, where: ${field_name}_filter_input, order: ${field_name}_order_input): [${params.module}Module]`
+        `${params.graphqlKey}(offset: Int, limit: Int, where: ${field_name}_filter_input, order: ${field_name}_order_input): [${params.module}Module]`
       )
       let relationshipInfo = {
         currentModule: moduleProps.name,
@@ -148,9 +152,7 @@ export const withModule = (moduleProps: WithModuleProps) => {
     const hasMany = (params: RelationParams) => {
       let field_name = generateRowFieldNameForModuleName(params.module)
       graphqlSchema.push(
-        `${
-          params.graphqlKey
-        }(offset: Int, limit: Int, where: ${field_name}_filter_input, order: ${field_name}_order_input): [${params.module}Module]`
+        `${params.graphqlKey}(offset: Int, limit: Int, where: ${field_name}_filter_input, order: ${field_name}_order_input): [${params.module}Module]`
       )
       let relationshipInfo = {
         currentModule: moduleProps.name,
@@ -265,6 +267,7 @@ export const withModule = (moduleProps: WithModuleProps) => {
       moduleName: moduleProps.name,
       tableInstance: tableInstance,
       schema: graphqlSchema.join(`\n`),
+      props: moduleProps,
       inputSchema: {
         insert: insertSchema || "",
         update: updateSchema || "",
@@ -283,4 +286,18 @@ export const withModule = (moduleProps: WithModuleProps) => {
 
     return schemaInformation
   }
+}
+
+export function validateModules(wertikApp: WertikApp) {
+  wLogWithInfo("Validating:", "Modules")
+  Object.keys(wertikApp.modules).forEach((name) => {
+    let module = wertikApp.modules[name]
+    if (name !== module.props.name) {
+      wLogWithError(
+        "[MODULE NAME CONFLICT]",
+        "Please use same name for both key and module name"
+      )
+      process.exit()
+    }
+  })
 }

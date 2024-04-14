@@ -88,7 +88,7 @@ export const getInsertSchema = (
   tableInfo: TableInfo
 ) => {
   const optionsInsertSchema = get(module, "graphql.createSchema", "")
-  const rowsFieldName = generateRowsFieldNameForModuleName(module.name)
+  const rowsFieldName = convertWordIntoPlural(module.name)
   if (optionsInsertSchema) return optionsInsertSchema
   let insertSchema = [`input insert_${rowsFieldName}_input {`]
   tableInfo.columns.forEach((column) => {
@@ -105,7 +105,7 @@ export const getInsertSchema = (
 
 export const getOrderSchema = (module: WithModuleProps, tableInfo) => {
   let orderSchema = [
-    `input ${generateRowFieldNameForModuleName(module.name)}_order_input {`,
+    `input ${convertWordIntoSingular(module.name)}_order_input {`,
   ]
   let relationships = store.database.relationships.filter(
     (c) => c.currentModule === module.name
@@ -186,12 +186,12 @@ export const generateRequestedFieldsFromGraphqlInfo = (info) => {
   return Object.keys(info).filter((c) => !keys.includes(c))
 }
 
-export const generateRowFieldNameForModuleName = (moduleName) => {
+export const convertWordIntoSingular = (moduleName) => {
   return snackCase(pluralize.singular(moduleName)).toLowerCase()
 }
-export const generateRowsFieldNameForModuleName = (moduleName) => {
+export const convertWordIntoPlural = (moduleName) => {
   let fieldName = snackCase(pluralize.plural(moduleName)).toLowerCase()
-  if (generateRowFieldNameForModuleName(moduleName) == fieldName) {
+  if (convertWordIntoSingular(moduleName) == fieldName) {
     return fieldName + "s"
   }
   return fieldName

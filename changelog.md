@@ -22,7 +22,6 @@
 - Rename `useMysqlDatabase` to `withMysqlDatabase` with its props.
 - Rename `useRedis` to `withRedis` with its props.
 - Rename `useGraphql` to `withGraphql` with its props.
-- Rename `useModule` to `withModule` with its props.
 - Rename `useMailer` to `withMailer` with its props.
 - Rename `useSocketIO` to `withSocketIO` with its props.
 - Rename `useWebSockets` to `withWebSockets` with its props.
@@ -34,7 +33,7 @@
 - Rename `useSchema` to `extendSchema` with its props.
 - Rename `useMutation` to `addMutation` with its props.
 - Rename `useExpress` to `getExpress`.
-
+- BREAKING CHANGE: Remove `useModule` and allowed using tables on database configuration.
 
 ### 3.3.0
 

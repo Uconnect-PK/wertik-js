@@ -3,8 +3,8 @@ import { wLogWithDateWithInfo } from "../utils/log"
 import { convertGraphqlRequestedFieldsIntoInclude } from "../database/eagerLoadingGraphqlQuery"
 import {
   generateRequestedFieldsFromGraphqlInfo,
-  generateRowFieldNameForModuleName,
-  generateRowsFieldNameForModuleName,
+  convertWordIntoSingular,
+  convertWordIntoPlural,
 } from "../modules/modulesHelpers"
 import convertFiltersIntoSequelizeObject from "../utils/convertFiltersIntoSequelizeObject"
 import graphqlFields from "graphql-fields"
@@ -13,8 +13,8 @@ import omit from "lodash.omit"
 import { voidFunction } from "../utils/voidFunction"
 
 export default function (module, schemaInformation, store) {
-  let rowsFieldName = generateRowsFieldNameForModuleName(module.name)
-  let singleRowFieldName = generateRowFieldNameForModuleName(module.name)
+  let rowsFieldName = convertWordIntoPlural(module.name)
+  let singleRowFieldName = convertWordIntoSingular(module.name)
 
   return {
     graphql: {
@@ -37,7 +37,7 @@ export default function (module, schemaInformation, store) {
             ${singleRowFieldName}(where: ${singleRowFieldName}_filter_input): ${
           module.name
         }Module
-            ${rowsFieldName}(pagination: PaginationInput, where: ${singleRowFieldName}_filter_input, order: ${generateRowFieldNameForModuleName(
+            ${rowsFieldName}(pagination: PaginationInput, where: ${singleRowFieldName}_filter_input, order: ${convertWordIntoSingular(
           module.name
         )}_order_input): ${module.name}List
             count${module.name}(where: ${singleRowFieldName}_filter_input):  Int

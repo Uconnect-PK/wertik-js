@@ -62,11 +62,12 @@ export interface WertikConfiguration {
   database?: {
     [key: string]: () => Promise<{
       credentials: WithMysqlDatabaseProps
-      instance: Sequelize
+      instance: Sequelize,
     }>
   }
   /**
    * Modules
+   * @deprecated Use `tables` on database connections.
    */
   modules?: {
     [key: string]: (options: {
@@ -197,7 +198,7 @@ export interface WertikApp {
         username: string
         host: string
       }
-      instance: Sequelize
+      instance: Sequelize,
     }
   }
   models: {

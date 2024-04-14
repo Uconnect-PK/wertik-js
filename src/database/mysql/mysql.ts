@@ -1,4 +1,4 @@
-import { Sequelize } from "sequelize"
+import { Model, ModelAttributes, ModelCtor, Sequelize } from "sequelize"
 import { databaseDefaultOptions } from "../../utils/defaultOptions"
 import { WithMysqlDatabaseProps } from "../../types/database"
 import get from "lodash.get"
@@ -8,6 +8,7 @@ import {
   wLogWithInfo,
   wLogWithSuccess,
 } from "../../utils/log"
+import { getMysqlTableInfo } from "./getTableInfo"
 
 export const getAllRelationships = (dbName: string) => {
   return `
@@ -37,6 +38,41 @@ export const withMysqlDatabase = function (obj: WithMysqlDatabaseProps) {
         wLog(error)
         process.exit(1)
       })
+      let models: ModelCtor<Model<any, any>>[] = []
+      obj.tables?.forEach(async table => {
+        const tableInfo = await getMysqlTableInfo(
+          table.name,
+          sequelize
+        )
+
+        let fields: ModelAttributes<Model<any, any>, any> = {}
+
+        tableInfo.columns.forEach((column) => {
+          if (column.columnName === "id") return
+          fields[column.columnName] = {
+            type: column.databaseType,
+            allowNull: column.isNull,
+            defaultValue: column.default,
+            primaryKey: column.isPrimary,
+            values: column.isEnum ? column.enumValues : null,
+          }
+        })
+
+        const tableInstance = sequelize.define(
+          table.name,
+          {
+            ...fields,
+            ...get(table, "extendFields", {}),
+          },
+          {
+            ...get(table, "tableOptions", {}),
+            ...databaseDefaultOptions.sql.defaultTableOptions,
+          }
+        )
+        models.push(tableInstance)
+      });
+
+      
       wLogWithSuccess(
         `[Wertik-Mysql-Database]`,
         `Successfully connected to database ${obj.name}`
@@ -47,6 +83,7 @@ export const withMysqlDatabase = function (obj: WithMysqlDatabaseProps) {
       return {
         credentials: obj,
         instance: sequelize,
+        models: models,
       }
     } catch (e) {
       wLog(`[DB] Connecting failed to database ${obj.name}`)

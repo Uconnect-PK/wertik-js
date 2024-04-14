@@ -84,6 +84,7 @@ const Wertik: (configuration?: WertikConfiguration) => Promise<WertikApp> = (
       if (configuration.database) {
         for (const databaseName of Object.keys(configuration.database || {})) {
           try {
+            //@ts-ignore
             wertikApp.database[databaseName] = await configuration.database[
               databaseName
             ]()

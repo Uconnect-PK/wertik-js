@@ -219,7 +219,8 @@ export interface WertikApp {
         name: string
         password: string
         username: string
-        host: string
+        host: string,
+        tables: WithMysqlDatabaseProps['tables']
       }
       instance: Sequelize,
       models: WertikModule["tableInstance"][],

@@ -29,7 +29,7 @@ wertik({
           name: "user",
           relationships: {
             hasMany: {
-              products: {
+              product: {
                 as: "products",
                 foreignKey: "user_id",
                 sourceKey: "id",
@@ -39,6 +39,15 @@ wertik({
         },
         {
           name: "product",
+          relationships: {
+            hasOne: {
+              user: {
+                as: "user",
+                foreignKey: "id",
+                sourceKey: "user_id",
+              }
+            }
+          }
         },
       ],
     }),

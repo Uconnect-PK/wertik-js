@@ -203,12 +203,13 @@ export default function (table, schemaInformation, store) {
                   convertGraphqlRequestedFieldsIntoInclude(
                     graphqlFields(info, {}, { processArguments: true }),
                     args,
-                    table
+                    table.name
                   )
 
                 const find = await schemaInformation.tableInstance.findOne({
                   where: omit(where, keys),
                   attributes: generateRequestedFieldsFromGraphqlInfo(
+                    schemaInformation.tableInstance.tableName,
                     graphqlFields(info)
                   ),
                   include: convertFieldsIntoInclude.include,
@@ -237,7 +238,7 @@ export default function (table, schemaInformation, store) {
                   convertGraphqlRequestedFieldsIntoInclude(
                     graphqlFields(info, {}, { processArguments: true }),
                     args,
-                    table
+                    table.name
                   )
 
                 return await paginate(
@@ -246,6 +247,7 @@ export default function (table, schemaInformation, store) {
                   convertFieldsIntoInclude.include,
                   {
                     attributes: generateRequestedFieldsFromGraphqlInfo(
+                      schemaInformation.tableInstance.tableName,
                       graphqlFields(info).rows
                     ),
                   },

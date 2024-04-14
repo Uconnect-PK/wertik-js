@@ -174,15 +174,14 @@ export const getRelationalFieldsRequestedInQuery = (
   return relationalFields
 }
 
-export const generateRequestedFieldsFromGraphqlInfo = (info) => {
-  const keys = [
-    ...wertikApp.store.database.relationships.map((c) => c.graphqlKey),
-    ...wertikApp.store.graphql.graphqlKeys,
+export const generateRequestedFieldsFromGraphqlInfo = (tableName, info) => {
+  const keysToIgnore = [
+    ...Object.keys(wertikApp.models[tableName].associations),
     "__typename",
     "__arguments",
   ]
 
-  return Object.keys(info).filter((c) => !keys.includes(c))
+  return Object.keys(info).filter((c) => !keysToIgnore.includes(c))
 }
 
 export const convertWordIntoSingular = (moduleName) => {

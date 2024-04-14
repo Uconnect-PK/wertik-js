@@ -32,33 +32,24 @@ export interface SqlTable {
     hasOne?: {
       [tableName: string]: {
         as: string,
-        foreignKey: string,
-        targetKey: string,
         [key: string]: any
       }
     },
     hasMany?: {
       [tableName: string]: {
         as: string,
-        foreignKey: string,
-        sourceKey: string,
         [key: string]: any
       }
     },
     belongsTo?: {
       [tableName: string]: {
         as: string,
-        foreignKey: string,
-        targetKey: string,
         [key: string]: any
       }
     },
     belongsToMany?: {
       [tableName: string]: {
         as: string,
-        through: string,
-        foreignKey: string,
-        otherKey: string,
         [key: string]: any
       }
     }

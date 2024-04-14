@@ -64,7 +64,7 @@ export const withMysqlDatabase = function (obj: WithMysqlDatabaseProps) {
         let fields: ModelAttributes<Model<any, any>, any> = {}
 
         tableInfo.columns.forEach((column) => {
-          if (column.columnName === "id") return
+          // if (column.columnName === "id") return
 
           if (column.isEnum) {
             wertikApp.store.graphql.typeDefs = wertikApp.store.graphql.typeDefs.concat(

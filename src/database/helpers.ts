@@ -7,6 +7,8 @@ import {
   enumTypes,
   jsonTypes,
 } from "./mysql/getTableInfo"
+import { WertikApp } from "src/types"
+import get from "lodash.get"
 
 export const convertDatabaseTypeIntoGraphqlType = (
   columnInfo: MysqlColumnInfoDescribeTable,
@@ -72,4 +74,15 @@ export const convertDatabaseTypeIntoGraphqlType = (
         .split(","),
     }
   }
+}
+
+
+
+export const applyRelationshipsFromStoreToDatabase = async (
+  app: WertikApp
+) => {
+  Object.keys(app.database).forEach(dbName => {
+    let db = app.database[dbName]
+    console.log(db.credentials)
+  });
 }

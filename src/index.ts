@@ -1,7 +1,7 @@
 import get from "lodash.get"
 import express from "express"
-import store, { wertikApp } from "./store"
-import { applyRelationshipsFromStoreToDatabase } from "./database/database"
+import { wertikApp } from "./store"
+import { applyRelationshipsFromStoreToDatabase } from "./database/helpers"
 import { emailSender } from "./mailer/index"
 import http from "http"
 import { WertikConfiguration, WertikApp } from "./types"
@@ -9,7 +9,7 @@ import { initializeBullBoard } from "./queue/index"
 import { wLogWithInfo, wLogWithSuccess } from "./utils/log"
 import { validateModules } from "./modules/modules"
 
-export * from "./database/database"
+export * from "./database/mysql/mysql"
 export * from "./modules/modules"
 export * from "./graphql"
 export * from "./mailer"
@@ -21,7 +21,6 @@ export * from "./queue"
 export * from "./redis"
 export * from "./logger"
 export * from "./database/mysql/mysql"
-export * from "./database/database"
 
 const Wertik: (configuration?: WertikConfiguration) => Promise<WertikApp> = (
   configuration: WertikConfiguration
@@ -99,7 +98,6 @@ const Wertik: (configuration?: WertikConfiguration) => Promise<WertikApp> = (
           wertikApp.modules[moduleName] = await configuration.modules[
             moduleName
           ]({
-            store: store,
             configuration: configuration,
             app: wertikApp,
           })
@@ -133,7 +131,7 @@ const Wertik: (configuration?: WertikConfiguration) => Promise<WertikApp> = (
         wertikApp.logger = configuration.logger
       }
 
-      applyRelationshipsFromStoreToDatabase(store, wertikApp)
+      applyRelationshipsFromStoreToDatabase(wertikApp)
 
       expressApp.get("/w/info", function (req, res) {
         res.json({
@@ -147,14 +145,9 @@ const Wertik: (configuration?: WertikConfiguration) => Promise<WertikApp> = (
         configuration,
       })
 
-      if (wertikApp?.models) {
-        store.database.models = wertikApp.models
-      }
-
       if (configuration.graphql) {
         wertikApp.graphql = configuration.graphql({
           wertikApp: wertikApp,
-          store: store,
           configuration: configuration,
           expressApp: expressApp,
         })

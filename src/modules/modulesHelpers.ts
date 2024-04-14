@@ -1,9 +1,9 @@
 import get from "lodash.get"
 import { WithModuleProps } from "../types/modules"
-import { TableInfo } from "../types/database"
+import { SqlTable, TableInfo } from "../types/database"
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter"
 import crud from "../crud"
-import store from "../store"
+import { wertikApp } from "../store"
 import pluralize from "pluralize"
 import snackCase from "lodash.snakecase"
 import isPlainObject from "lodash.isplainobject"
@@ -65,12 +65,12 @@ export const getGraphQLTypeNameFromSqlType = (
 }
 
 export const getUpdateSchema = (
-  module: WithModuleProps,
+  table: SqlTable,
   tableInfo: TableInfo
 ) => {
-  const optionsUpdateSchema = get(module, "graphql.updateSchema", "")
+  const optionsUpdateSchema = get(table, "graphql.updateSchema", "")
   if (optionsUpdateSchema) return optionsUpdateSchema
-  let updateSchema = [`input update${module.name}Input {`]
+  let updateSchema = [`input update_${table.name}_input {`]
   tableInfo.columns.forEach((column) => {
     if (column.columnName !== "id" && !column.isDateColumn) {
       updateSchema.push(
@@ -84,11 +84,11 @@ export const getUpdateSchema = (
 }
 
 export const getInsertSchema = (
-  module: WithModuleProps,
+  table: SqlTable,
   tableInfo: TableInfo
 ) => {
-  const optionsInsertSchema = get(module, "graphql.createSchema", "")
-  const rowsFieldName = convertWordIntoPlural(module.name)
+  const optionsInsertSchema = get(table, "graphql.createSchema", "")
+  const rowsFieldName = convertWordIntoPlural(table.name)
   if (optionsInsertSchema) return optionsInsertSchema
   let insertSchema = [`input insert_${rowsFieldName}_input {`]
   tableInfo.columns.forEach((column) => {
@@ -103,12 +103,12 @@ export const getInsertSchema = (
   return insertSchema.join("\n")
 }
 
-export const getOrderSchema = (module: WithModuleProps, tableInfo) => {
+export const getOrderSchema = (table: SqlTable, tableInfo) => {
   let orderSchema = [
-    `input ${convertWordIntoSingular(module.name)}_order_input {`,
+    `input ${convertWordIntoSingular(table.name)}_order_input {`,
   ]
-  let relationships = store.database.relationships.filter(
-    (c) => c.currentModule === module.name
+  let relationships = wertikApp.store.database.relationships.filter(
+    (c) => c.currentModule === table.name
   )
   tableInfo.columns.forEach((column) => {
     orderSchema.push(`${column.columnName}: order_by`)
@@ -127,13 +127,12 @@ export const generateEnumTypeForGraphql = (column: TableInfo["columns"][0]) => {
 
 export const generateGenerateGraphQLCrud = (
   props,
-  schemaInformation,
-  store
+  schemaInformation
 ) => {
-  const { graphql } = crud(props, schemaInformation, store)
+  const { graphql } = crud(props, schemaInformation, wertikApp.store)
   const resolvers = graphql.generateCrudResolvers()
 
-  store.graphql.typeDefs = store.graphql.typeDefs.concat(
+  wertikApp.store.graphql.typeDefs = wertikApp.store.graphql.typeDefs.concat(
     `\n ${schemaInformation.schema} 
     \n ${schemaInformation.inputSchema.filters}
     \n ${schemaInformation.inputSchema.insert}
@@ -142,20 +141,20 @@ export const generateGenerateGraphQLCrud = (
     `
   )
 
-  store.graphql.typeDefs = store.graphql.typeDefs.concat(
+  wertikApp.store.graphql.typeDefs = wertikApp.store.graphql.typeDefs.concat(
     `\n ${graphql.generateQueriesCrudSchema()}`
   )
-  store.graphql.typeDefs = store.graphql.typeDefs.concat(
+  wertikApp.store.graphql.typeDefs = wertikApp.store.graphql.typeDefs.concat(
     `\n ${graphql.generateMutationsCrudSchema()}`
   )
 
-  store.graphql.resolvers.Query = {
-    ...store.graphql.resolvers.Query,
+  wertikApp.store.graphql.resolvers.Query = {
+    ...wertikApp.store.graphql.resolvers.Query,
     ...resolvers.Query,
   }
 
-  store.graphql.resolvers.Mutation = {
-    ...store.graphql.resolvers.Mutation,
+  wertikApp.store.graphql.resolvers.Mutation = {
+    ...wertikApp.store.graphql.resolvers.Mutation,
     ...resolvers.Mutation,
   }
 }
@@ -169,7 +168,7 @@ export const getRelationalFieldsRequestedInQuery = (
 ) => {
   const fields = Object.keys(requestedFields)
   // Filter all relationships for provided modules, based on fields provided filter out those relationships.
-  const relationalFields = store.database.relationships
+  const relationalFields = wertikApp.store.database.relationships
     .filter((c) => c.currentModule === module.name)
     .filter((relationship) => fields.includes(relationship.graphqlKey))
   return relationalFields
@@ -177,8 +176,8 @@ export const getRelationalFieldsRequestedInQuery = (
 
 export const generateRequestedFieldsFromGraphqlInfo = (info) => {
   const keys = [
-    ...store.database.relationships.map((c) => c.graphqlKey),
-    ...store.graphql.graphqlKeys,
+    ...wertikApp.store.database.relationships.map((c) => c.graphqlKey),
+    ...wertikApp.store.graphql.graphqlKeys,
     "__typename",
     "__arguments",
   ]

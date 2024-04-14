@@ -1,4 +1,4 @@
-import store, { wertikApp } from "../store"
+import  { wertikApp } from "../store"
 import isPlainObject from "lodash.isplainobject"
 import get from "lodash.get"
 import has from "lodash.has"
@@ -34,14 +34,14 @@ export const convertGraphqlRequestedFieldsIntoInclude = (
   let order = []
   let depth = []
   graphqlFields = clean(graphqlFields)
-  const currentModuleRelationships = store.database.relationships.filter(
+  const currentModuleRelationships = wertikApp.store.database.relationships.filter(
     (f) => f.currentModule == module.name
   )
 
   const currentModuleRelationshipsKeys = currentModuleRelationships.map(
     (c) => c.graphqlKey
   )
-  const allRelationshipKeys = store.database.relationships.map(
+  const allRelationshipKeys = wertikApp.store.database.relationships.map(
     (c) => c.graphqlKey
   )
 
@@ -60,7 +60,7 @@ export const convertGraphqlRequestedFieldsIntoInclude = (
       if (allRelationshipKeys.includes(key)) {
         depth.push(key)
         let _localDepth = [...JSON.parse(JSON.stringify(depth))]
-        const relationship = store.database.relationships.find(
+        const relationship = wertikApp.store.database.relationships.find(
           (c) => c.graphqlKey === key
         )
         const sequelizeModel = wertikApp.models[relationship.referencedModule]

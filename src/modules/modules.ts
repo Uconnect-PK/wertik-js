@@ -39,7 +39,7 @@ export const withModule = (moduleProps: WithModuleProps) => {
     store.modules.push(moduleProps)
     let currentModuleRelationships = []
     let tableInstance: ModelStatic<Model<any, any>>
-    let graphqlSchema = [`type ${moduleProps.name}Module {`]
+    let graphqlSchema = [`type ${moduleProps.name} {`]
     let listSchema = ""
     let filterSchema = [
       `input ${convertWordIntoSingular(
@@ -287,7 +287,7 @@ export const withModule = (moduleProps: WithModuleProps) => {
     }
 
     if (useDatabase) {
-      generateGenerateGraphQLCrud(moduleProps, schemaInformation, store)
+      generateGenerateGraphQLCrud(moduleProps, schemaInformation)
       app.models[moduleProps.name] = tableInstance
     }
 

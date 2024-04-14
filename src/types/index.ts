@@ -63,6 +63,7 @@ export interface WertikConfiguration {
     [key: string]: () => Promise<{
       credentials: WithMysqlDatabaseProps
       instance: Sequelize,
+      models: WertikModule["tableInstance"][]
     }>
   }
   /**
@@ -71,7 +72,6 @@ export interface WertikConfiguration {
    */
   modules?: {
     [key: string]: (options: {
-      store: Store
       configuration: WertikConfiguration
       app: WertikApp
     }) => Promise<WertikModule>
@@ -133,7 +133,6 @@ export interface WertikConfiguration {
    * Graphql
    */
   graphql?: (options: {
-    store: Store
     configuration: WertikConfiguration
     wertikApp: WertikApp
     expressApp: any
@@ -189,6 +188,30 @@ export interface WertikApp {
   modules: {
     [key: string]: WertikModule
   }
+  store: {
+    graphql: {
+      graphqlKeys: string[]
+      typeDefs: string
+      resolvers: {
+        Query: {
+          [key: string]: Function
+        }
+        Mutation: {
+          [key: string]: Function
+        }
+        [key: string]: {
+          [key: string]: Function | string | number | boolean | object | any
+        }
+      }
+    }
+    database: {
+      relationships: any[]
+      models: {
+        [key: string]: any
+      }
+    }
+    modules: WithModuleProps[]
+  } 
   database: {
     [key: string]: {
       credentials: {
@@ -199,6 +222,7 @@ export interface WertikApp {
         host: string
       }
       instance: Sequelize,
+      models: WertikModule["tableInstance"][],
     }
   }
   models: {

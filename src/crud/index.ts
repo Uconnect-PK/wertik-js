@@ -12,44 +12,40 @@ import { paginate } from "./paginate"
 import omit from "lodash.omit"
 import { voidFunction } from "../utils/voidFunction"
 
-export default function (module, schemaInformation, store) {
-  let rowsFieldName = convertWordIntoPlural(module.name)
-  let singleRowFieldName = convertWordIntoSingular(module.name)
+export default function (table, schemaInformation, store) {
+  let rowsFieldName = convertWordIntoPlural(table.name)
+  let singleRowFieldName = convertWordIntoSingular(table.name)
 
   return {
     graphql: {
       generateQueriesCrudSchema() {
         return `
-        type ${module.name}List {
-            rows: [${module.name}Module]
+        type ${table.name}List {
+            rows: [${table.name}]
             pagination: Pagination
             paginationProperties: PaginationProperties @deprecated(reason: "Use pagination instead")
         }
-        type ${module.name}BulkMutationResponse {
-            returning: [${module.name}Module]
+        type ${table.name}_bulk_mutation_response {
+            returning: [${table.name}]
             affectedRows: Int
         }
-        type Count${module.name} {
+        type Count${table.name} {
             count: Int
         }
 
         extend type Query {
-            ${singleRowFieldName}(where: ${singleRowFieldName}_filter_input): ${
-          module.name
-        }Module
-            ${rowsFieldName}(pagination: PaginationInput, where: ${singleRowFieldName}_filter_input, order: ${convertWordIntoSingular(
-          module.name
-        )}_order_input): ${module.name}List
-            count${module.name}(where: ${singleRowFieldName}_filter_input):  Int
+            ${singleRowFieldName}(where: ${singleRowFieldName}_filter_input): ${table.name}
+            ${rowsFieldName}(pagination: PaginationInput, where: ${singleRowFieldName}_filter_input, order: ${convertWordIntoSingular(table.name)}_order_input): ${table.name}List
+            count${table.name}(where: ${singleRowFieldName}_filter_input):  Int
         }`
       },
       generateMutationsCrudSchema() {
         return `
             extend type Mutation {
-              update_${rowsFieldName}(input: update${module.name}Input,where: ${singleRowFieldName}_filter_input!): ${module.name}BulkMutationResponse
-              insert_${rowsFieldName}(input: [insert_${rowsFieldName}_input]): ${module.name}BulkMutationResponse
+              update_${rowsFieldName}(input: update_${table.name}_input,where: ${singleRowFieldName}_filter_input!): ${table.name}_bulk_mutation_response
+              insert_${rowsFieldName}(input: [insert_${rowsFieldName}_input]): ${table.name}_bulk_mutation_response
               delete_${rowsFieldName}(where: ${singleRowFieldName}_filter_input!): SuccessResponse
-              insert_or_update_${rowsFieldName}(id: Int, input: insert_${rowsFieldName}_input): ${module.name}List
+              insert_or_update_${rowsFieldName}(id: Int, input: insert_${rowsFieldName}_input): ${table.name}List
             }
           `
       },
@@ -57,7 +53,7 @@ export default function (module, schemaInformation, store) {
         return {
           Mutation: {
             [`insert_or_update_${rowsFieldName}`]: get(
-              module,
+              table,
               "graphql.mutations.InsertOrUpdate",
               async (_, args, context, info) => {
                 wLogWithDateWithInfo(
@@ -65,7 +61,7 @@ export default function (module, schemaInformation, store) {
                   `${info.fieldName} - ${JSON.stringify(args)}`
                 )
                 const argsFromEvent = await get(
-                  module,
+                  table,
                   "events.beforeInsertOrUpdate",
                   voidFunction
                 )(_, args, context, info)
@@ -80,7 +76,7 @@ export default function (module, schemaInformation, store) {
                   })
 
                   if (!___find) {
-                    throw new Error(`${module.name} Not found`)
+                    throw new Error(`${table.name} Not found`)
                   }
 
                   await schemaInformation.tableInstance.update(args.input, {
@@ -98,7 +94,7 @@ export default function (module, schemaInformation, store) {
               }
             ),
             [`update_${rowsFieldName}`]: get(
-              module,
+              table,
               "graphql.mutations.update",
               async (_, args, context, info) => {
                 wLogWithDateWithInfo(
@@ -106,7 +102,7 @@ export default function (module, schemaInformation, store) {
                   `${info.fieldName} - ${JSON.stringify(args)}`
                 )
                 const argsFromEvent = await get(
-                  module,
+                  table,
                   "events.beforeUpdate",
                   voidFunction
                 )(_, args, context, info)
@@ -130,7 +126,7 @@ export default function (module, schemaInformation, store) {
               }
             ),
             [`delete_${rowsFieldName}`]: get(
-              module,
+              table,
               "graphql.mutations.delete",
               async (_, args, context, info) => {
                 wLogWithDateWithInfo(
@@ -138,7 +134,7 @@ export default function (module, schemaInformation, store) {
                   `${info.fieldName} - ${JSON.stringify(args)}`
                 )
                 const argsFromEvent = await get(
-                  module,
+                  table,
                   "events.beforeDelete",
                   voidFunction
                 )(_, args, context, info)
@@ -149,11 +145,11 @@ export default function (module, schemaInformation, store) {
                 await schemaInformation.tableInstance.destroy({
                   where: where,
                 })
-                return { message: `${module.name} Deleted` }
+                return { message: `${table.name} Deleted` }
               }
             ),
             [`insert_${rowsFieldName}`]: get(
-              module,
+              table,
               "graphql.mutations.create",
               async (_, args, context, info) => {
                 wLogWithDateWithInfo(
@@ -161,7 +157,7 @@ export default function (module, schemaInformation, store) {
                   `${info.fieldName} - ${JSON.stringify(args)}`
                 )
                 const argsFromEvent = await get(
-                  module,
+                  table,
                   "events.beforeCreate",
                   voidFunction
                 )(_, args, context, info)
@@ -181,7 +177,7 @@ export default function (module, schemaInformation, store) {
           },
           Query: {
             [singleRowFieldName]: get(
-              module,
+              table,
               "graphql.queries.view",
               async (_, args, context, info) => {
                 wLogWithDateWithInfo(
@@ -189,7 +185,7 @@ export default function (module, schemaInformation, store) {
                   `${info.fieldName} - ${JSON.stringify(args)}`
                 )
                 const argsFromEvent = await get(
-                  module,
+                  table,
                   "events.beforeView",
                   voidFunction
                 )(_, args, context, info)
@@ -207,7 +203,7 @@ export default function (module, schemaInformation, store) {
                   convertGraphqlRequestedFieldsIntoInclude(
                     graphqlFields(info, {}, { processArguments: true }),
                     args,
-                    module
+                    table
                   )
 
                 const find = await schemaInformation.tableInstance.findOne({
@@ -223,7 +219,7 @@ export default function (module, schemaInformation, store) {
               }
             ),
             [rowsFieldName]: get(
-              module,
+              table,
               "graphql.queries.list",
               async (_, args, context, info) => {
                 wLogWithDateWithInfo(
@@ -231,7 +227,7 @@ export default function (module, schemaInformation, store) {
                   `${rowsFieldName} - args ${JSON.stringify(args)}`
                 )
                 const argsFromEvent = await get(
-                  module,
+                  table,
                   "events.beforeList",
                   voidFunction
                 )(_, args, context, info)
@@ -241,7 +237,7 @@ export default function (module, schemaInformation, store) {
                   convertGraphqlRequestedFieldsIntoInclude(
                     graphqlFields(info, {}, { processArguments: true }),
                     args,
-                    module
+                    table
                   )
 
                 return await paginate(
@@ -257,8 +253,8 @@ export default function (module, schemaInformation, store) {
                 )
               }
             ),
-            [`count${module.name}`]: get(
-              module,
+            [`count${table.name}`]: get(
+              table,
               "graphql.queries.count",
               async (_, args, context, info) => {
                 wLogWithDateWithInfo(
@@ -266,7 +262,7 @@ export default function (module, schemaInformation, store) {
                   `${info.fieldName} - ${JSON.stringify(args)}`
                 )
                 const argsFromEvent = await get(
-                  module,
+                  table,
                   "events.beforeCount",
                   voidFunction
                 )(_, args, context, info)

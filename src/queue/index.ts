@@ -1,7 +1,8 @@
 import Queue from "bull"
 import { isPackageInstalled } from "../utils/checkInstalledPackages"
 import { WertikApp, WertikConfiguration } from "../types"
-import { useQueueProps } from "./../types/queue"
+import { WithQueueProps } from "./../types/queue"
+import { wLog } from "../utils/log"
 
 /**
  * @param name
@@ -10,7 +11,7 @@ import { useQueueProps } from "./../types/queue"
  * @returns Queue
  */
 
-export const useQueue = (props: useQueueProps) => {
+export const withQueue = (props: WithQueueProps) => {
   return () => new Queue(props.name, props.url, props.options)
 }
 
@@ -18,7 +19,7 @@ export const initializeBullBoard = (props: {
   wertikApp: WertikApp
   configuration: WertikConfiguration
 }) => {
-  var isInstalledBullBoardExpress = isPackageInstalled("@bull-board/express")
+  let isInstalledBullBoardExpress = isPackageInstalled("@bull-board/express")
   if (!isInstalledBullBoardExpress) {
     throw new Error(
       "Please install package @bull-board/express to initialize Bull Board for Queue"
@@ -51,7 +52,7 @@ export const initializeBullBoard = (props: {
     serverAdapter.setBasePath(queuePath)
     express.use(queuePath, serverAdapter.getRouter())
 
-    console.log(
+    wLog(
       `Queue UI Monitoring Bull Board running at: http://localhost:${props.configuration.port}${queuePath}`
     )
 

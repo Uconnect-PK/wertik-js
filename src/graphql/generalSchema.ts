@@ -6,7 +6,12 @@ export default `
 	scalar JSON
 	scalar JSONObject
 
-	input StringFilterInput {
+	enum order_by {
+		ASC
+		DESC
+	}
+
+	input string_filter_input {
 		_eq: String
 		_ne: String
 		_like: String
@@ -20,12 +25,12 @@ export default `
 		_notRegexp: String
 		_iRegexp: String
 		_notIRegexp: String
-		_or: StringFilterInput
-		_and: StringFilterInput
+		_or: string_filter_input
+		_and: string_filter_input
 		_between: [String]
 		_notBetween: [String]
 	}
-	input IntFilterInput {
+	input int_filter_input {
 		_eq: Int
 		_gt: Int
 		_gte: Int
@@ -36,10 +41,10 @@ export default `
 		_notBetween: [Int]
 		_in: [Int]
 		_notIn: [Int]
-		_or: IntFilterInput
-		_and: IntFilterInput
+		_or: int_filter_input
+		_and: int_filter_input
 	}
-	input DateFilterInput {
+	input date_filter_input {
 		_eq: String
 		_gt: String
 		_gte: String
@@ -49,7 +54,7 @@ export default `
 		_neq: String
 		_nin: [String!]
 	}
-	input BooleanFilterInput {
+	input boolean_filter_input {
 		_eq: Boolean
 		_ne: Boolean
 	}
@@ -65,13 +70,18 @@ export default `
 		page: Int
 		limit: Int
 	}
-	input FilterInput {
+	input filter_input {
 		column: String!
 		operator: String!
 		value: String!
 	}
 	type Pagination {
+		total: Int
+		pages: Int
 		page: Int
+		nextPage: Int
+		previousPage: Int
+		hasMore: Boolean
 		limit: Int
 	}
 	type Filter {
@@ -88,4 +98,5 @@ export default `
 		hasMore: Boolean
 		limit: Int
 	}
+	
 `

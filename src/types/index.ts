@@ -1,13 +1,15 @@
 import { Sequelize } from "sequelize/types"
-import { useMysqlDatabaseProps } from "./database"
+import { WithMysqlDatabaseProps } from "./database"
 import { SendEmailProps } from "./mailer"
-import { WertikModule } from "./modules"
+import { WertikModule, WithModuleProps } from "./modules"
+import { ApolloServer } from "apollo-server-express"
 
 export type iObject = { [key: string]: any }
 
 export interface Store {
   graphql: {
-    typeDefs: String
+    graphqlKeys: string[]
+    typeDefs: string
     resolvers: {
       Query: {
         [key: string]: Function
@@ -20,6 +22,7 @@ export interface Store {
   database: {
     relationships: Array<iObject>
   }
+  modules: WithModuleProps[]
 }
 
 export interface WertikConfiguration {
@@ -42,23 +45,33 @@ export interface WertikConfiguration {
   httpServer?: iObject
   /**
    * [Optional] When passed as true, Wertik will not start server.
+   *
+   * @deprecated Use `selfStart` instead.
+   * @default true
    */
   skip?: boolean
+
+  /**
+   * When passed as true, Wertik will not start server.
+   * @default true
+   */
+  selfStart?: boolean
   /**
    * Database connections
    */
   database?: {
     [key: string]: () => Promise<{
-      credentials: useMysqlDatabaseProps
-      instance: Sequelize
+      credentials: WithMysqlDatabaseProps
+      instance: Sequelize,
+      models: WertikModule["tableInstance"][]
     }>
   }
   /**
    * Modules
+   * @deprecated Use `tables` on database connections.
    */
   modules?: {
     [key: string]: (options: {
-      store: Store
       configuration: WertikConfiguration
       app: WertikApp
     }) => Promise<WertikModule>
@@ -85,7 +98,7 @@ export interface WertikConfiguration {
     }
     events?: {
       /**
-       * Runs when email sents successfully.
+       * Runs when email sent successfully.
        */
       onEmailSent?: (options: {
         options: iObject
@@ -93,18 +106,18 @@ export interface WertikConfiguration {
         configuration: WertikConfiguration
         emailInstance: any
         previewURL: string | boolean
-        mailer: String
-      }) => void | any | null | undefined
+        mailer: string
+      }) => void
       /**
        * Runs when email fails to send.
        */
       onEmailSentFailed?: (options: {
-        mailer: String
+        mailer: string
         wertikApp: WertikApp
         configuration: WertikConfiguration
         error: any
         options: iObject
-      }) => void | any | null | undefined
+      }) => void
     }
   }
   /**
@@ -120,11 +133,10 @@ export interface WertikConfiguration {
    * Graphql
    */
   graphql?: (options: {
-    store: Store
     configuration: WertikConfiguration
     wertikApp: WertikApp
     expressApp: any
-  }) => iObject
+  }) => ApolloServer
   /**
    * Cron Jobs
    */
@@ -169,10 +181,37 @@ export interface WertikConfiguration {
 export interface WertikApp {
   appEnv: "production" | "development" | "local"
   sendEmail?: (options: { mailer: string; options: SendEmailProps }) => iObject
+  restartServer: () => void
+  stopServer: () => void
+  startServer: () => void
   port: number
   modules: {
     [key: string]: WertikModule
   }
+  store: {
+    graphql: {
+      graphqlKeys: string[]
+      typeDefs: string
+      resolvers: {
+        Query: {
+          [key: string]: Function
+        }
+        Mutation: {
+          [key: string]: Function
+        }
+        [key: string]: {
+          [key: string]: Function | string | number | boolean | object | any
+        }
+      }
+    }
+    database: {
+      relationships: any[]
+      models: {
+        [key: string]: any
+      }
+    }
+    modules: WithModuleProps[]
+  } 
   database: {
     [key: string]: {
       credentials: {
@@ -180,16 +219,18 @@ export interface WertikApp {
         name: string
         password: string
         username: string
-        host: string
+        host: string,
+        tables: WithMysqlDatabaseProps['tables']
       }
-      instance: Sequelize
+      instance: Sequelize,
+      models: WertikModule["tableInstance"][],
     }
   }
   models: {
     [key: string]: WertikModule["tableInstance"]
   }
   mailer: iObject
-  graphql: iObject
+  graphql: ApolloServer
   sockets: iObject
   cronJobs: iObject
   storage: iObject
@@ -203,18 +244,18 @@ export interface WertikApp {
 /**
  * Provide same options that redis createClient method requires.
  */
-export interface useRedisProps {
+export interface WithRedisProps {
   [key: string]: any
   name: string
 }
 
-export interface useMailerProps {
+export interface WithMailerProps {
   /**
    * Provide name for your mailer.
    */
   name: string
   /**
-   * Provide options that you provide procide to nodemailer.createTransport function.
+   * Provide options that you provide provide to nodemailer.createTransport function.
    */
   options?: {
     [key: string]: any

@@ -1,4 +1,4 @@
-import { isPlainObject } from "lodash"
+import isPlainObject from "lodash.isplainobject"
 import sequelize from "sequelize"
 const Op = sequelize.Op
 
@@ -6,7 +6,7 @@ const wrap = (operator: string) => {
   return Op[operator.replace("_", "")]
 }
 
-const iterate = (obj) => {
+const replaceFilterOperators = (obj) => {
   if (isPlainObject(obj)) {
     Object.keys(obj).forEach((element) => {
       const value = obj[element]
@@ -16,13 +16,13 @@ const iterate = (obj) => {
         delete obj[element]
       }
       if (isPlainObject(value) || Array.isArray(value)) {
-        iterate(value)
+        replaceFilterOperators(value)
       }
     })
     return obj
   } else if (Array.isArray(obj)) {
-    obj.forEach((element) => iterate(element))
+    obj.forEach((element) => replaceFilterOperators(element))
   }
 }
 
-export default iterate
+export default replaceFilterOperators

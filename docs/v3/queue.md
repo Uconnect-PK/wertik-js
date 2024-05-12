@@ -60,12 +60,12 @@ This `useQueue` method simply instantiates a new instance of bull and returns th
 
 - A queue can be instantiated with some useful options, for instance, we can specify the `location` and `password` of our Redis server, as well as some other useful settings. we can use them as `options : {redis : {port : 6379, host : "127.0.0.1", password : "somepass" }}`.
 
-#### useQueueProps
+#### UseQueueProps
 
 -The `useQueue` method always expects an instantiation name such as(`my-queue-name`) all the other arguments are optional.
 
 ```typescript
-export interface useQueueProps {
+export interface UseQueueProps {
   name?: string
   url?: string
   options?: QueueOptions

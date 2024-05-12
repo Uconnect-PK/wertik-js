@@ -15,7 +15,7 @@ export function isPackageInstalled(packageName) {
   }
 }
 
-export function check(name: String) {
+export function check(name: string) {
   const isInstalled = isPackageInstalled(name)
   if (isInstalled) {
     return true

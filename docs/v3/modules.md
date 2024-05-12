@@ -4,16 +4,16 @@ Wertik-js allows extending your app with more features using the `modules` term.
 
 ```js
 import wertik, {
-  useMysqlDatabase,
-  useMailer,
-  useModule,
-  useGraphql,
+  withMysqlDatabase,
+  withMailer,
+  withModule,
+  withGraphql,
 } from "wertik-js/lib/";
 
 weritk({
   port: 1200,
   database: {
-    default: useMysqlDatabase({
+    default: withMysqlDatabase({
       name: "default",
       password: "pass",
       host: "localhost",
@@ -21,16 +21,16 @@ weritk({
       username: "root",
     }),
   },
-  graphql: useGraphql(),
+  graphql: withGraphql,(),
   mailer: {
-    default: useMailer(),
+    default: withMailer(),
   },
   modules: {
-    users: useModule({
+    users: withModule({
       table: "users",
       database: "default",
       name: "users",
-      useMysqlDatabase: true,
+      useDatabase: true,
     }),
   },
 });
@@ -48,10 +48,10 @@ When you provide `useMysqlDatabase: true`, `table` and `database`, Wertik JS aut
 You have to initialize its module in this way:
 
 ```js
-import wertik, { useModule, useMysqlDatabase, useGraphql } from "wertik-js/lib/";
+import wertik, { useModule, useMysqlDatabase, withGraphql, } from "wertik-js/lib/";
 wertik({
   port: 1200,
-  graphql: useGraphql(),
+  graphql: withGraphql,(),
   database: {
     default: useMysqlDatabase({
       name: "dbname",
@@ -98,13 +98,13 @@ input updateGamesInput {
 For filtering data from `games` table, Wertik JS will also create an input for filtering:
 
 ```graphql
-input GamesFilterInput {
-  name: StringFilterInput
-  publisher: StringFilterInput
+input Gamesfilter_input {
+  name: Stringfilter_input
+  publisher: Stringfilter_input
 }
 ```
 
-To explore more about `StringFilterInput` and other filter input please visit GraphQL Playground to get more familiar with it.
+To explore more about `Stringfilter_input` and other filter input please visit GraphQL Playground to get more familiar with it.
 
 ## This will generate
 
@@ -117,13 +117,13 @@ To explore more about `StringFilterInput` and other filter input please visit Gr
 ```graphql
 type Query {
   version: String
-  viewGames(where: GamesFilterInput): Games
+  viewGames(where: Gamesfilter_input): Games
   listGames(
     pagination: PaginationInput
-    where: GamesFilterInput
+    where: Gamesfilter_input
     sorting: [SortingInput]
   ): GamesList
-  countGames(where: GamesFilterInput): Int
+  countGames(where: Gamesfilter_input): Int
 }
 ```
 
@@ -140,10 +140,10 @@ type Mutation {
   version: String
   updateGames(
     input: updateGamesInput
-    where: GamesFilterInput!
+    where: Gamesfilter_input!
   ): GamesBulkMutationResponse
   createGames(input: [createGamesInput]): GamesBulkMutationResponse
-  deleteGames(where: GamesFilterInput!): SuccessResponse
+  deleteGames(where: Gamesfilter_input!): SuccessResponse
   createOrUpdateGames(id: Int, input: createGamesInput): Games
 }
 ```
@@ -157,7 +157,7 @@ When you provide `useMysqlDatabase: true` for a module called Games. Wertik JS w
 ```graphql
 listGames(
   pagination: PaginationInput
-  where: GamesFilterInput
+  where: Gamesfilter_input
   sorting: [SortingInput]
 ): GamesList
 ```
@@ -171,7 +171,7 @@ input PaginationInput {
 }
 ```
 
-And `GamesFilterInput` is same as Sequelize search object but main keywords such as like, `eq` or `like` starts with `_`, For example:
+And `Gamesfilter_input` is same as Sequelize search object but main keywords such as like, `eq` or `like` starts with `_`, For example:
 
 ```graphql
 query GamesList {
@@ -280,25 +280,25 @@ wertik({
       name: "Games",
       table: "games",
       database: "jscontainer",
-      on({ useExpress, useQuery, useMutation, useSchema }) {
+      on({ useExpress, addQuery, addMutation, extendSchema }) {
         useExpress((express) => {
           express.get("/404", (req, res) => res.status(404).send("404"));
         });
-        useQuery({
+        addQuery({
           name: "getGames",
           query: "getGames: [Games]",
           resolver() {
             return [];
           },
         });
-        useMutation({
+        addMutation({
           name: "updateAllGames",
           query: "updateAllGames: [Games]",
           resolver() {
             return [];
           },
         });
-        useSchema(`
+        extendSchema(`
             type MyType {
               id: Int
               name: String

@@ -1,51 +1,32 @@
-import { get } from "lodash"
-import crud from "../crud"
+import get from "lodash.get"
 import { databaseDefaultOptions } from "../utils/defaultOptions"
-import { RelationParams, useModuleProps } from "../types/modules"
+import { RelationParams, WithModuleProps } from "../types/modules"
 import {
-  getCreateSchema,
+  getInsertSchema,
   getUpdateSchema,
   generateEnumTypeForGraphql,
+  generateGenerateGraphQLCrud,
+  convertWordIntoPlural,
+  convertWordIntoSingular,
+  getOrderSchema,
 } from "./modulesHelpers"
 import { getMysqlTableInfo } from "../database/mysql/getTableInfo"
 import { Store, WertikApp, WertikConfiguration } from "./../types/index"
-import { ModelCtor, Model, ModelAttributes } from "sequelize/types"
-
-const generateGenerateGraphQLCrud = (props, schemaInformation, store) => {
-  const { graphql } = crud(props, schemaInformation, store)
-  const resolvers = graphql.generateCrudResolvers()
-
-  store.graphql.typeDefs = store.graphql.typeDefs.concat(
-    `\n ${schemaInformation.schema} 
-    \n ${schemaInformation.inputSchema.filters}
-    \n ${schemaInformation.inputSchema.create}
-    \n ${schemaInformation.inputSchema.update}
-    `
-  )
-
-  store.graphql.typeDefs = store.graphql.typeDefs.concat(
-    `\n ${graphql.generateQueriesCrudSchema()}`
-  )
-  store.graphql.typeDefs = store.graphql.typeDefs.concat(
-    `\n ${graphql.generateMutationsCrudSchema()}`
-  )
-
-  store.graphql.resolvers.Query = {
-    ...store.graphql.resolvers.Query,
-    ...resolvers.Query,
-  }
-
-  store.graphql.resolvers.Mutation = {
-    ...store.graphql.resolvers.Mutation,
-    ...resolvers.Mutation,
-  }
-}
+import { ModelStatic, Model, ModelAttributes } from "sequelize/types"
+import {
+  wLogWithError,
+  wLogWithInfo,
+  wLogWithSuccess,
+  wLogWithWarn,
+} from "../utils/log"
+import camelize from "../utils/camelize"
+import has from "lodash.has"
 
 /**
  * Wertik js module
- * @param props see interface useModuleProps
+ * @param moduleProps
  */
-export const useModule = (moduleProps: useModuleProps) => {
+export const withModule = (moduleProps: WithModuleProps) => {
   return async ({
     store,
     configuration,
@@ -55,8 +36,17 @@ export const useModule = (moduleProps: useModuleProps) => {
     configuration: WertikConfiguration
     app: WertikApp
   }) => {
-    let tableInstance: ModelCtor<Model<any, any>>
-    let graphqlSchema = []
+    store.modules.push(moduleProps)
+    let currentModuleRelationships = []
+    let tableInstance: ModelStatic<Model<any, any>>
+    let graphqlSchema = [`type ${moduleProps.name} {`]
+    let listSchema = ""
+    let filterSchema = [
+      `input ${convertWordIntoSingular(
+        moduleProps.name
+      )}_filter_input {`,
+    ]
+    let orderSchema = ""
 
     const useDatabase = get(moduleProps, "useDatabase", false)
 
@@ -67,13 +57,13 @@ export const useModule = (moduleProps: useModuleProps) => {
       )
     }
 
-    const useSchema = (string: string) => {
+    const extendSchema = (string: string) => {
       store.graphql.typeDefs = store.graphql.typeDefs.concat(`
         ${string}
       `)
     }
 
-    const useQuery = ({ query, resolver, name }) => {
+    const addQuery = ({ query, resolver, name }) => {
       store.graphql.typeDefs = store.graphql.typeDefs.concat(`
         extend type Query {
           ${query}
@@ -82,7 +72,7 @@ export const useModule = (moduleProps: useModuleProps) => {
       store.graphql.resolvers.Query[name] = resolver
     }
 
-    const useMutation = ({ query, resolver, name }) => {
+    const addMutation = ({ query, resolver, name }) => {
       store.graphql.typeDefs = store.graphql.typeDefs.concat(`
         extend type Mutation {
           ${query}
@@ -91,24 +81,127 @@ export const useModule = (moduleProps: useModuleProps) => {
       store.graphql.resolvers.Mutation[name] = resolver
     }
 
-    const useExpress = (fn = (express) => {}) => {
+    const getExpress = (fn = (express) => {}) => {
       setTimeout(() => {
         fn(app.express)
       }, 2500)
     }
 
-    let listSchema = ""
-    let filterSchema = []
+    const hasOne = (params: RelationParams) => {
+      graphqlSchema.push(`${params.graphqlKey}: ${params.module}Module`)
+      let relationshipInfo = {
+        currentModule: moduleProps.name,
+        currentModuleDatabase: moduleProps.database,
+        graphqlKey: params.graphqlKey,
+        referencedModule: params.module,
+        referencedModuleDatabase: params.database,
+        options: params.options,
+        type: "hasOne",
+      }
+      store.database.relationships.push(relationshipInfo)
+      currentModuleRelationships.push(relationshipInfo)
+      store.graphql.graphqlKeys.push(camelize(params.module))
+      filterSchema.push(
+        `${camelize(params.graphqlKey)}: ${convertWordIntoSingular(
+          params.module
+        )}_filter_input`
+      )
+    }
+    const belongsTo = (params: RelationParams) => {
+      graphqlSchema.push(`${params.graphqlKey}: ${params.module}Module`)
+      let relationshipInfo = {
+        currentModule: moduleProps.name,
+        currentModuleDatabase: moduleProps.database,
+        graphqlKey: params.graphqlKey,
+        referencedModule: params.module,
+        referencedModuleDatabase: params.database,
+        options: params.options,
+        type: "belongsTo",
+      }
+      store.database.relationships.push(relationshipInfo)
+      currentModuleRelationships.push(relationshipInfo)
+      store.graphql.graphqlKeys.push(camelize(params.module))
+      filterSchema.push(
+        `${camelize(params.graphqlKey)}: ${convertWordIntoSingular(
+          params.module
+        )}_filter_input`
+      )
+    }
+    const belongsToMany = (params: RelationParams) => {
+      let field_name = convertWordIntoSingular(params.module)
+      graphqlSchema.push(
+        `${params.graphqlKey}(offset: Int, limit: Int, where: ${field_name}_filter_input, order: ${field_name}_order_input): [${params.module}Module]`
+      )
+      let relationshipInfo = {
+        currentModule: moduleProps.name,
+        currentModuleDatabase: moduleProps.database,
+        graphqlKey: params.graphqlKey,
+        referencedModule: params.module,
+        referencedModuleDatabase: params.database,
+        options: params.options,
+        type: "belongsToMany",
+      }
+      store.database.relationships.push(relationshipInfo)
+      currentModuleRelationships.push(relationshipInfo)
+      store.graphql.graphqlKeys.push(camelize(params.module))
+      filterSchema.push(
+        `${camelize(params.graphqlKey)}: ${convertWordIntoSingular(
+          params.module
+        )}_filter_input`
+      )
+    }
+    const hasMany = (params: RelationParams) => {
+      let field_name = convertWordIntoSingular(params.module)
+      graphqlSchema.push(
+        `${params.graphqlKey}(offset: Int, limit: Int, where: ${field_name}_filter_input, order: ${field_name}_order_input): [${params.module}Module]`
+      )
+      let relationshipInfo = {
+        currentModule: moduleProps.name,
+        currentModuleDatabase: moduleProps.database,
+        graphqlKey: params.graphqlKey,
+        referencedModule: params.module,
+        referencedModuleDatabase: params.database,
+        options: params.options,
+        type: "hasMany",
+      }
+      currentModuleRelationships.push(relationshipInfo)
+      store.database.relationships.push(relationshipInfo)
+      store.graphql.graphqlKeys.push(camelize(params.module))
+      filterSchema.push(
+        `${camelize(params.graphqlKey)}: ${convertWordIntoSingular(
+          params.module
+        )}_filter_input`
+      )
+    }
+    get(moduleProps, "on", () => {})({
+      addQuery,
+      addMutation,
+      getExpress,
+      hasOne,
+      belongsTo,
+      belongsToMany,
+      hasMany,
+      extendSchema,
+    })
+
+    let insertSchema = []
+    let updateSchema = []
+
     if (useDatabase) {
-      var createSchema = []
-      var updateSchema = []
+      if (!has(app.database, moduleProps.database)) {
+        wLogWithError(
+          `Unknown database: ${moduleProps.database}`,
+          `Unknown database mentioned in module ${moduleProps.name}`
+        )
+        process.exit()
+      }
+
       const connection = app.database[moduleProps.database]
       // info
       const tableInfo = await getMysqlTableInfo(
-        moduleProps,
+        moduleProps.table,
         connection.instance
       )
-      // console.log(tableInfo)
 
       let fields: ModelAttributes<Model<any, any>, any> = {}
 
@@ -138,9 +231,6 @@ export const useModule = (moduleProps: useModuleProps) => {
       if (moduleProps?.graphql?.schema) {
         graphqlSchema = moduleProps.graphql.schema.replace("}", "").split("\n")
       } else {
-        // graphql schema
-        graphqlSchema = [`type ${moduleProps.name} {`]
-
         tableInfo.columns.forEach((columnInfo) => {
           if (columnInfo.isEnum) {
             store.graphql.typeDefs = store.graphql.typeDefs.concat(
@@ -155,111 +245,68 @@ export const useModule = (moduleProps: useModuleProps) => {
 
       updateSchema = getUpdateSchema(moduleProps, tableInfo)
 
-      createSchema = getCreateSchema(moduleProps, tableInfo)
+      insertSchema = getInsertSchema(moduleProps, tableInfo)
 
-      filterSchema = [`input ${moduleProps.name}FilterInput {`]
+      orderSchema = getOrderSchema(moduleProps, tableInfo)
 
       tableInfo.columns.forEach((column) => {
-        let filterInput =
+        let filter_input =
           column.databaseType.toLowerCase() === "enum"
             ? `${column.columnName}: ${column.graphqlType}`
-            : `${column.columnName}: ${column.graphqlType}FilterInput`
+            : `${
+                column.columnName
+              }: ${column.graphqlType.toLowerCase()}_filter_input`
 
-        filterSchema.push(filterInput)
+        filterSchema.push(filter_input)
       })
 
       listSchema = `
         query List${moduleProps.name} {
-          list: [${moduleProps.name}]
+          rows: [${moduleProps.name}]
           paginationProperties: PaginationProperties
           filters: ${moduleProps.name}Filters
         }
       `
-    }
 
-    const hasOne = (params: RelationParams) => {
-      graphqlSchema.push(`${params.graphqlKey}: ${params.module}`)
-      store.database.relationships.push({
-        currentModule: moduleProps.name,
-        currentModuleDatabase: moduleProps.database,
-        graphqlKey: params.graphqlKey,
-        referencedModule: params.module,
-        referencedModuleDatabase: params.database,
-        options: params.options,
-        type: "hasOne",
-      })
-    }
-    const belongsTo = (params: RelationParams) => {
-      graphqlSchema.push(`${params.graphqlKey}: ${params.module}`)
-      store.database.relationships.push({
-        currentModule: moduleProps.name,
-        currentModuleDatabase: moduleProps.database,
-        graphqlKey: params.graphqlKey,
-        referencedModule: params.module,
-        referencedModuleDatabase: params.database,
-        options: params.options,
-        type: "belongsTo",
-      })
-    }
-    const belongsToMany = (params: RelationParams) => {
-      graphqlSchema.push(`${params.graphqlKey}: ${params.module}List`)
-      store.database.relationships.push({
-        currentModule: moduleProps.name,
-        currentModuleDatabase: moduleProps.database,
-        graphqlKey: params.graphqlKey,
-        referencedModule: params.module,
-        referencedModuleDatabase: params.database,
-        options: params.options,
-        type: "belongsToMany",
-      })
-    }
-    const hasMany = (params: RelationParams) => {
-      graphqlSchema.push(`${params.graphqlKey}: ${params.module}List`)
-      store.database.relationships.push({
-        currentModule: moduleProps.name,
-        currentModuleDatabase: moduleProps.database,
-        graphqlKey: params.graphqlKey,
-        referencedModule: params.module,
-        referencedModuleDatabase: params.database,
-        options: params.options,
-        type: "hasMany",
-      })
-    }
-
-    get(moduleProps, "on", () => {})({
-      useQuery,
-      useMutation,
-      useExpress,
-      hasOne,
-      belongsTo,
-      belongsToMany,
-      hasMany,
-      useSchema,
-    })
-
-    if (useDatabase) {
       graphqlSchema.push("}")
       filterSchema.push("}")
     }
 
     const schemaInformation = {
+      moduleName: moduleProps.name,
       tableInstance: tableInstance,
       schema: graphqlSchema.join(`\n`),
+      props: moduleProps,
       inputSchema: {
-        create: createSchema || "",
+        insert: insertSchema || "",
         update: updateSchema || "",
         list: listSchema,
         filters: filterSchema.join("\n"),
+        order_schema: orderSchema || "",
       },
     }
 
     if (useDatabase) {
-      generateGenerateGraphQLCrud(moduleProps, schemaInformation, store)
+      generateGenerateGraphQLCrud(moduleProps, schemaInformation)
       app.models[moduleProps.name] = tableInstance
     }
 
-    console.log(`[Module]`, `Initialized module "${moduleProps.name}"`)
+    wLogWithInfo(`[Wertik-Module]`, `Initialized module "${moduleProps.name}"`)
 
     return schemaInformation
   }
+}
+
+export function validateModules(wertikApp: WertikApp) {
+  wLogWithInfo("Validating:", "Modules")
+  Object.keys(wertikApp.modules).forEach((name) => {
+    let module = wertikApp.modules[name]
+    if (name !== module.props.name) {
+      wLogWithError(
+        "[MODULE NAME CONFLICT]",
+        "Please use same name for both key and module name"
+      )
+      process.exit()
+    }
+  })
 }

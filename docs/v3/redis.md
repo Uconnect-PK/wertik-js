@@ -1,11 +1,11 @@
 # Redis(Beta)
 
-Wertik JS allows a using redis, Wertik JS uses package named `redis(options: useRedisProps)`. Wertik JS gives a function called `useRedis` which allows creating a redis server. Let's create a redis client:
+Wertik JS allows a using redis, Wertik JS uses package named `redis(options: UseRedisProps)`. Wertik JS gives a function called `useRedis` which allows creating a redis server. Let's create a redis client:
 
-Where `useRedisProps` is:
+Where `UseRedisProps` is:
 
 ```typescript
-export interface useRedisProps {
+export interface UseRedisProps {
   [key: string]: any
   name: string;
 }

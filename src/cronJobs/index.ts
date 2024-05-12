@@ -1,9 +1,9 @@
-import { get } from "lodash"
+import get from "lodash.get"
 import nodeCron from "node-cron"
-import { useCronJobsProps } from "../types/cronJobs"
+import { UseCronJobsProps } from "../types/cronJobs"
 import { iObject, WertikApp, WertikConfiguration } from "../types"
 
-export const useCronJob = (cron: useCronJobsProps) => {
+export const useCronJob = (cron: UseCronJobsProps) => {
   return ({
     configuration,
     wertikApp,

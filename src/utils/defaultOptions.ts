@@ -12,7 +12,7 @@ export const databaseDefaultOptions = {
       logging: false,
       operatorsAliases: "0",
       underscored: false,
-      freetableName: true,
+      freezeTableName: true,
     },
     defaultTableOptions: {
       timestamps: false,

@@ -1,9 +1,9 @@
 import { WertikApp } from "."
 
-export interface useCronJobsProps {
+export interface UseCronJobsProps {
   expression: string
   name: string
-  beforeRun?: (app: WertikApp) => void | any
-  afterRun?: (app: WertikApp) => void | any
-  handler: (app: WertikApp) => void | any
+  beforeRun?: (app: WertikApp) => void
+  afterRun?: (app: WertikApp) => void
+  handler: (app: WertikApp) => void
 }

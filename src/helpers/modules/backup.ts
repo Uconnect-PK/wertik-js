@@ -1,7 +1,8 @@
-import moment from "moment"
-import { useModule } from "../../modules/modules"
+import dayjs from "./../../utils/dayjs"
+import { withModule } from "../../modules/modules"
 import mysqldump from "mysqldump"
 import fs from "fs"
+import { wLog } from "../../utils/log"
 
 const dumpDatabase = async (
   dbName: string,
@@ -13,7 +14,7 @@ const dumpDatabase = async (
     name: string
   }
 ) => {
-  const filename = `backups/${moment().format(
+  const filename = `backups/${dayjs().format(
     "MMMM-DD-YYYY-h-mm-ss-a"
   )}-database-${dbName}.sql`.toLowerCase()
 
@@ -44,7 +45,7 @@ const uploadDumpToDigitalOceanSpaces = async (
   Bucket,
   ACL
 ) => {
-  const data = await fs.readFileSync(filename)
+  const data = fs.readFileSync(filename)
 
   const params = {
     Bucket: Bucket,
@@ -58,7 +59,7 @@ const uploadDumpToDigitalOceanSpaces = async (
   return response
 }
 const uploadDumpToDropbox = async (filename, dropboxInstance) => {
-  const data: Buffer = await fs.readFileSync(filename)
+  const data: Buffer = fs.readFileSync(filename)
   const response = await dropboxInstance.dropbox.filesUpload({
     strict_conflict: false,
     path: `/${filename}`,
@@ -72,21 +73,21 @@ export const WertikBackupModule = (
   table: string,
   tableOptions: any = {}
 ) =>
-  useModule({
+  withModule({
     name: "Backup",
     useDatabase: true,
     database: database,
     table: table,
     tableOptions: tableOptions,
-    on: function ({ useSchema, useMutation }) {
-      useSchema(`
+    on: function ({ extendSchema, addMutation }) {
+      extendSchema(`
       type BackupSuccessResponse {
         message: String
         filename: String
-        backup: Backup
+        backup: BackupModule
       }
     `)
-      useMutation({
+      addMutation({
         name: "backupLocal",
         query: "backupLocal(database: [String]!): [BackupSuccessResponse]",
         async resolver(_, args, context) {
@@ -107,7 +108,7 @@ export const WertikBackupModule = (
           return push
         },
       })
-      useMutation({
+      addMutation({
         name: "backupDigitalOceanSpaces",
         query:
           "backupDigitalOceanSpaces(ACL: String!, Bucket: String!, storage: String!, database: [String]!): [BackupSuccessResponse]",
@@ -151,7 +152,7 @@ export const WertikBackupModule = (
           }
         },
       })
-      useMutation({
+      addMutation({
         name: "backupDropbox",
         query:
           "backupDropbox(storage: String!, database: [String]): [BackupSuccessResponse]",
@@ -188,7 +189,7 @@ export const WertikBackupModule = (
 
             return push
           } catch (e) {
-            console.log(e)
+            wLog(e)
             throw new Error(e)
           }
         },

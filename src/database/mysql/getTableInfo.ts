@@ -1,4 +1,4 @@
-import { useModuleProps } from "src/types/modules"
+import { WithModuleProps } from "src/types/modules"
 import { convertDatabaseTypeIntoGraphqlType } from "../helpers"
 import { MysqlColumnInfoDescribeTable, TableInfo } from "./../../types/database"
 
@@ -30,10 +30,10 @@ export const enumTypes = ["enum"]
 export const jsonTypes = ["json"]
 
 export const getMysqlTableInfo = async (
-  module: useModuleProps,
+  tableName: string,
   sequelize: any
 ): Promise<TableInfo> => {
-  let rows = await sequelize.query(`describe ${module.table};`)
+  let rows = await sequelize.query(`describe ${tableName};`)
   rows = rows[0]
 
   if (rows) {
@@ -42,18 +42,19 @@ export const getMysqlTableInfo = async (
     ).map((element) => {
       const graphqlType = convertDatabaseTypeIntoGraphqlType(
         element,
-        module.name
+        tableName
       )
-      var isPrimary = element.Key === "PRI"
+      let isPrimary = element.Key === "PRI"
+      const isNull = element.Null === "YES"
 
       return {
         columnName: element.Field,
         default: element.Default,
         graphqlType: graphqlType.graphqlType,
-        graphqlCreateInputType: graphqlType.graphqlCreateInputType,
+        graphqlInsertInputType: graphqlType.graphqlInsertInputType,
         graphqlUpdateInputType: graphqlType.graphqlUpdateInputType,
         enumValues: graphqlType.enumValues,
-        isNull: element.Null === "no" ? false : true,
+        isNull: isNull,
         isEnum: graphqlType.isEnum,
         databaseType: graphqlType.databaseType,
         isPrimary: isPrimary,
@@ -62,14 +63,14 @@ export const getMysqlTableInfo = async (
     })
 
     return {
-      name: module.table,
+      name: tableName,
       columns: fields,
       originalDescribeColumns: rows,
     }
   }
 
   return {
-    name: module.table,
+    name: tableName,
     columns: [],
     originalDescribeColumns: rows,
   }

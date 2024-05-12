@@ -1,10 +1,10 @@
 import nodemailer from "nodemailer"
 import handlebars from "handlebars"
-import { useMailerProps, WertikApp, WertikConfiguration } from "../types"
+import { WithMailerProps, WertikApp, WertikConfiguration } from "../types"
 import { SendEmailProps } from "../types/mailer"
-import { get } from "lodash"
+import { wLog, wLogWithSuccess } from "../utils/log"
 
-export const useMailer = (props: useMailerProps) => {
+export const withMailer = (props: WithMailerProps) => {
   return async () => {
     let testAccount = props.options
       ? null
@@ -22,7 +22,7 @@ export const useMailer = (props: useMailerProps) => {
           },
         }
 
-    console.log(`[Mailer]`, `Initialized mailer "${props.name}"`)
+    wLogWithSuccess(`[Wertik-NodeMailer]`, `Initialized mailer "${props.name}"`)
 
     return nodemailer.createTransport(emailConfiguration)
   }
@@ -53,14 +53,11 @@ export const emailSender = ({
         html: resultTemplate,
         subject: props.options.subject,
       })
-      if (emailInstance && emailInstance.messageId) {
-        console.log("Message sent: %s", emailInstance.messageId)
+      if (emailInstance?.messageId) {
+        wLog("Message sent: %s", emailInstance.messageId)
       }
-      if (nodemailer && nodemailer.getTestMessageUrl) {
-        console.log(
-          "Preview URL: %s",
-          nodemailer.getTestMessageUrl(emailInstance)
-        )
+      if (nodemailer?.getTestMessageUrl) {
+        wLog("Preview URL: %s", nodemailer.getTestMessageUrl(emailInstance))
       }
 
       if (configuration.mailer.events.onEmailSent) {
@@ -70,16 +67,13 @@ export const emailSender = ({
           wertikApp,
           configuration,
           emailInstance,
-          previewURL:
-            nodemailer && nodemailer.getTestMessageUrl
-              ? nodemailer.getTestMessageUrl(emailInstance)
-              : "",
+          previewURL: nodemailer?.getTestMessageUrl(emailInstance),
         })
       }
 
       return emailInstance
     } catch (e) {
-      console.log(e)
+      wLog(e)
       if (configuration.mailer.events.onEmailSentFailed) {
         configuration.mailer.events.onEmailSentFailed({
           mailer: props.mailer,

@@ -9,4 +9,4 @@ export interface SendEmailProps {
   [key: string]: any
 }
 
-export interface userMailerProps {}
+export interface UserMailerProps {}

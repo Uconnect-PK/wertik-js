@@ -2,6 +2,7 @@ import {
   Server as SocketIOServer,
   ServerOptions as SocketIOServerOptions,
 } from "socket.io"
+import { wLogWithSuccess } from "../utils/log"
 import {
   Server as WebSocketServer,
   ServerOptions as WebSocketServerOptions,
@@ -13,7 +14,7 @@ import { WertikApp, WertikConfiguration } from "../types"
  * @param props see interface WebSocketServerOptions
  * @returns WebSocketServer instance
  */
-export const useWebSockets = (props: WebSocketServerOptions = {}) => {
+export const withWebSockets = (props: WebSocketServerOptions = {}) => {
   return ({
     configuration,
     wertikApp,
@@ -24,8 +25,9 @@ export const useWebSockets = (props: WebSocketServerOptions = {}) => {
     if (!props.path) {
       throw new Error("Path must be passed for useWebSockets")
     }
-    console.log(
-      `Web Sockets server starting at ws://localhost:${configuration.port}${props.path}`
+    wLogWithSuccess(
+      `[Wertik-WebSockets]`,
+      `ws://localhost:${configuration.port}${props.path}`
     )
     return new WebSocketServer({
       server: wertikApp.httpServer,
@@ -39,7 +41,7 @@ export const useWebSockets = (props: WebSocketServerOptions = {}) => {
  * @param props see interface WebSocketServerOptions
  * @returns WebSocketServer instance
  */
-export const useIndependentWebSocketsServer = (
+export const withIndependentWebSocketsServer = (
   props: WebSocketServerOptions = {}
 ) => {
   return ({
@@ -49,10 +51,9 @@ export const useIndependentWebSocketsServer = (
     configuration: WertikConfiguration
     wertikApp: WertikApp
   }) => {
-    console.log(
-      `Web Sockets server starting at ws://localhost:${props.port}/${
-        props.path ?? ""
-      }`
+    wLogWithSuccess(
+      "[Wertik-WebSocket]",
+      `ws://localhost:${props.port}/${props.path ?? ""}`
     )
     return new WebSocketServer({
       ...props,
@@ -65,7 +66,7 @@ export const useIndependentWebSocketsServer = (
  * @param props see interface SocketIOServerOptions from socket.io
  * @returns SocketIOServer
  */
-export const useSocketIO = (props: any = {}) => {
+export const withSocketIO = (props: any = {}) => {
   return ({
     configuration,
     wertikApp,
@@ -73,10 +74,9 @@ export const useSocketIO = (props: any = {}) => {
     configuration: WertikConfiguration
     wertikApp: WertikApp
   }) => {
-    console.log(
-      `Socket.IO server starting at http://localhost:${configuration.port}${
-        props.path ?? "/socket.io"
-      }`
+    wLogWithSuccess(
+      `[Wertik-Socket.IO]`,
+      `http://localhost:${configuration.port}${props.path ?? "/socket.io"}`
     )
     return new SocketIOServer(wertikApp.httpServer, props ?? {})
   }

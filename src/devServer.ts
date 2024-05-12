@@ -1,36 +1,139 @@
-import wertik, { useMysqlDatabase, useGraphql, useModule } from "./index"
+import wertik, {
+  withMysqlDatabase,
+  withApolloGraphql,
+  withModule,
+  withWebSockets,
+  withSocketIO,
+  withIndependentWebSocketsServer,
+  withLogger,
+  withWinstonTransport,
+  withMailer,
+  withRedis,
+} from "./index"
+import modules from "./devServerTestModules"
 
 wertik({
   port: 1200,
-  graphql: useGraphql(),
+  graphql: withApolloGraphql({
+    storeTypeDefFilePath: process.cwd() + "/graphqlSchema.graphql",
+  }),
   database: {
-    wapgee: useMysqlDatabase({
+    wertik: withMysqlDatabase({
       port: 3306,
-      name: "wapgee",
-      host: "localhost",
+      name: "wertik_test",
+      host: "127.0.0.1",
       password: "pass",
       username: "root",
+      tables: [
+        {
+          name: "user",
+          relationships: {
+            hasMany: {
+              product: {
+                as: "products",
+                foreignKey: "user_id",
+                sourceKey: "id",
+              }
+            }
+          }
+        },
+        {
+          name: "product",
+          relationships: {
+            hasOne: {
+              user: {
+                as: "user",
+                foreignKey: "id",
+                sourceKey: "user_id",
+              }
+            }
+          }
+        },
+      ],
     }),
-    test: useMysqlDatabase({
+    default: withMysqlDatabase({
       username: "root",
-      port: 3306,
       password: "pass",
+      name: "wapgee_prod",
       host: "localhost",
-      name: "wertik",
+      port: 3306,
     }),
   },
-  modules: {
-    User: useModule({
-      name: "User",
-      useDatabase: true,
-      table: "users",
-      database: "wapgee",
+  // modules: modules,
+  // Product: withModule({
+  //   name: "Product",
+  //   useDatabase: true,
+  //   database: "wertik",
+  //   table: "product",
+  //   on: function ({ belongsTo }) {
+  //     belongsTo({
+  //       database: "wertik",
+  //       graphqlKey: "user",
+  //       module: "User",
+  //       options: {
+  //         as: "user",
+  //         foreignKey: "user_id",
+  //         targetKey: "id",
+  //       },
+  //     })
+  //   },
+  // }),
+  // User: withModule({
+  //   name: "User",
+  //   useDatabase: true,
+  //   database: "wertik",
+  //   table: "user",
+  //   on: function ({ hasMany }) {
+  //     hasMany({
+  //       database: "wertik",
+  //       graphqlKey: "products",
+  //       module: "Product",
+  //       options: {
+  //         as: "products",
+  //         foreignKey: "user_id",
+  //         sourceKey: "id",
+  //       },
+  //     })
+  //   },
+  // }),
+  // Category: withModule({
+  //   name: "Category",
+  //   useDatabase: true,
+  //   database: "wertik",
+  //   table: "category",
+  // }),
+  // },
+  sockets: {
+    mySockets: withWebSockets({
+      path: "/websockets",
     }),
-    test: useModule({
-      name: "Shirts",
-      useDatabase: true,
-      database: "test",
-      table: "shirts",
+    socketio: withSocketIO({
+      path: "/mysocketioserver",
+    }),
+    mySockets2: withIndependentWebSocketsServer({
+      port: 1500,
+    }),
+  },
+  logger: withLogger({
+    transports: withWinstonTransport((winston) => {
+      return [
+        new winston.transports.File({
+          filename: "info.log",
+          level: "info",
+        }),
+      ]
+    }),
+  }),
+  // mailer: {
+  //   instances: {
+  //     default: withMailer({
+  //       name: "Default",
+  //     }),
+  //   },
+  // },
+  redis: {
+    testRedis: withRedis({
+      name: "testRedis",
     }),
   },
 })

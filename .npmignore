@@ -18,3 +18,5 @@ uploads
 backups
 docs
 tests
+
+test_database.sql

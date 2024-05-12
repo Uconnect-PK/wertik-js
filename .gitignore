@@ -17,3 +17,6 @@ warning.log
 /backups
 .DS_STORE
 lib
+
+.scannerwork
+graphqlSchema.graphql

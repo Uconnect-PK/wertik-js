@@ -5,7 +5,7 @@ export interface GetMiddlewareOptionsGraphql extends GetMiddlewareOptions {
   path: string
 }
 
-export interface useGraphqlProps {
+export interface WithApolloGraphqlProps {
   options?: {
     [key: string]: any
   }
@@ -15,6 +15,10 @@ export interface useGraphqlProps {
     Query: {}
   }
   typeDefs?: string
+  storeTypeDefFilePath?: string
+  validation?: {
+    depthLimit?: number
+  }
 }
 
 export interface GraphqlInitializeProps {

@@ -1,7 +1,7 @@
 import { iObject } from "."
-import { ModelCtor, Model } from "sequelize/types"
+import { ModelStatic, Model } from "sequelize/types"
 
-export interface useQueryProps {
+export interface AddQueryProps {
   /**
    * Schema for this query, for example: getUsers: [Users]
    */
@@ -15,7 +15,7 @@ export interface useQueryProps {
    */
   name: string
 }
-export interface useMutationProps {
+export interface AddMutationProps {
   /**
    * Schema for this query, for example: deleteUsers: Boolean
    */
@@ -29,7 +29,7 @@ export interface useMutationProps {
    */
   name: string
 }
-export type useExpressProps = Function
+export type GetExpressProps = Function
 export interface RelationParams {
   module: string
   graphqlKey: string
@@ -38,15 +38,14 @@ export interface RelationParams {
     [key: string]: string | number | null
   }
 }
-export type useSchemaProps = string
 
-export interface useModuleProps {
+export interface WithModuleProps {
   /**
    * Your module name.
    */
   name: string
   /**
-   * Are you using a database connection to this module? If yes, you will need to provide a database and table.
+   * If your module requires a database connection, you will need to provide a database and table using the 'useDatabase' property. This property should be set to the name of the database and table that your module will use to perform its operations.
    */
   useDatabase: boolean
   /**
@@ -83,7 +82,7 @@ export interface useModuleProps {
     /**
      * Wertik-js creates create a schema from the database table. Once defined this, Wertik JS will ignore creating create a schema from the table information.
      */
-    createSchema: string
+    insertSchema: string
     mutations?: {
       /**
        * Overrides default behavior of updating a record from the database table.
@@ -96,11 +95,11 @@ export interface useModuleProps {
       /**
        * Overrides default behavior of create a record from the database table.
        */
-      create?: Function
+      insert?: Function
       /**
        * Overrides default behavior of creating or updating a record from the database table.
        */
-      createOrUpdate?: Function
+      insertOrUpdate?: Function
     }
   }
   /**
@@ -110,15 +109,15 @@ export interface useModuleProps {
     /**
      * This Method allows you adding graphql query to your module.
      */
-    useQuery: (props: useQueryProps) => {} | void
+    addQuery: (props: AddQueryProps) => {} | void
     /**
      * This Method allows you adding graphql mutation to your module.
      */
-    useMutation: (props: useMutationProps) => {} | void
+    addMutation: (props: AddMutationProps) => {} | void
     /**
      * This method gives you access to express app instance.
      */
-    useExpress: (express: any) => void
+    getExpress: (express: any) => void
     /**
      * This method adds a one-to-one relationship to a module.
      */
@@ -132,16 +131,16 @@ export interface useModuleProps {
      */
     belongsToMany: (props: RelationParams) => {} | void
     /**
-     * This method adds belogs to many relationship to a module.
+     * This method adds belongs to many relationship to a module.
      */
     hasMany: (props: RelationParams) => {} | void
     /**
      * This method adds has many relationship to a module.
      */
-    useSchema: (props: useSchemaProps) => {} | void
+    extendSchema: (props: string) => {} | void
   }) => void
   /**
-   * Graphql events when a CRUD opreation happens.
+   * Graphql events when a CRUD operation happens.
    */
   events?: {
     /**
@@ -159,7 +158,7 @@ export interface useModuleProps {
     /**
      * This events runs before beforeCreate mutation.
      */
-    beforeCreate?: Function
+    beforeInsert?: Function
     /**
      * This events runs before beforeDelete mutation.
      */
@@ -169,19 +168,20 @@ export interface useModuleProps {
      */
     beforeUpdate?: Function
     /**
-     * This events runs before beforeCreateOrUpdate mutation.
+     * This events runs before beforeInsertOrUpdate mutation.
      */
-    beforeCreateOrUpdate?: Function
+    beforeInsertOrUpdate?: Function
   }
 }
 
 export interface WertikModule {
-  tableInstance: ModelCtor<Model<any, any>>
+  tableInstance: ModelStatic<Model<any, any>>
   schema: string
   inputSchema: {
-    create: string | any[]
+    insert: string | any[]
     update: string | any[]
     list: string
     filters: string
   }
+  props: WithModuleProps
 }

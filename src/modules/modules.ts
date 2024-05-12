@@ -24,7 +24,7 @@ import has from "lodash.has"
 
 /**
  * Wertik js module
- * @param props see interface UseModuleProps
+ * @param moduleProps
  */
 export const withModule = (moduleProps: WithModuleProps) => {
   return async ({

@@ -1,4 +1,4 @@
-import { Sequelize } from "sequelize"
+import { Model, ModelAttributes, ModelCtor, Sequelize } from "sequelize"
 import { databaseDefaultOptions } from "../../utils/defaultOptions"
 import { WithMysqlDatabaseProps } from "../../types/database"
 import get from "lodash.get"
@@ -8,6 +8,16 @@ import {
   wLogWithInfo,
   wLogWithSuccess,
 } from "../../utils/log"
+import { getMysqlTableInfo } from "./getTableInfo"
+import {
+  convertWordIntoSingular,
+  generateEnumTypeForGraphql,
+  generateGenerateGraphQLCrud,
+  getInsertSchema,
+  getOrderSchema,
+  getUpdateSchema,
+} from "../../modules/modulesHelpers"
+import { wertikApp } from "../../store"
 
 export const getAllRelationships = (dbName: string) => {
   return `
@@ -37,6 +47,89 @@ export const withMysqlDatabase = function (obj: WithMysqlDatabaseProps) {
         wLog(error)
         process.exit(1)
       })
+      let models: ModelCtor<Model<any, any>>[] = []
+      obj.tables?.forEach(async (table) => {
+
+        let graphqlSchema = [`type ${table.name} {`]
+        let listSchema = ""
+        let filterSchema = [
+          `input ${convertWordIntoSingular(table.name)}_filter_input {`,
+        ]
+        let updateSchema = ""
+        let insertSchema = ""
+        let orderSchema = ""
+
+        const tableInfo = await getMysqlTableInfo(table.name, sequelize)
+
+        let fields: ModelAttributes<Model<any, any>, any> = {}
+
+        tableInfo.columns.forEach((column) => {
+          // if (column.columnName === "id") return
+
+          if (column.isEnum) {
+            wertikApp.store.graphql.typeDefs = wertikApp.store.graphql.typeDefs.concat(
+              generateEnumTypeForGraphql(column)
+            )
+          }
+
+          updateSchema = getUpdateSchema(table, tableInfo)
+          insertSchema = getInsertSchema(table, tableInfo)
+          orderSchema = getOrderSchema(table, tableInfo)
+
+          graphqlSchema.push(`${column.columnName}: ${column.graphqlType}`)
+
+          let filter_input =
+            column.databaseType.toLowerCase() === "enum"
+              ? `${column.columnName}: ${column.graphqlType}`
+              : `${
+                  column.columnName
+                }: ${column.graphqlType.toLowerCase()}_filter_input`
+
+          filterSchema.push(filter_input)
+
+          fields[column.columnName] = {
+            type: column.databaseType,
+            allowNull: column.isNull,
+            defaultValue: column.default,
+            primaryKey: column.isPrimary,
+            values: column.isEnum ? column.enumValues : null,
+          }
+        })
+        graphqlSchema.push("}")
+        filterSchema.push("}")
+
+        const tableInstance = sequelize.define(
+          table.name,
+          {
+            ...fields,
+            ...get(table, "extendFields", {}),
+          },
+          {
+            ...get(table, "tableOptions", {}),
+            ...databaseDefaultOptions.sql.defaultTableOptions,
+          }
+        )
+
+
+        wertikApp.models[table.name] = tableInstance
+        const schemaInformation = {
+          moduleName: table.name,
+          tableInstance: tableInstance,
+          schema: graphqlSchema.join(`\n`),
+          inputSchema: {
+            insert: insertSchema || "",
+            update: updateSchema || "",
+            list: listSchema,
+            filters: filterSchema.join("\n"),
+            order_schema: orderSchema || "",
+          },
+        }
+
+        generateGenerateGraphQLCrud(table, schemaInformation)
+
+        models.push(tableInstance)
+      })
+
       wLogWithSuccess(
         `[Wertik-Mysql-Database]`,
         `Successfully connected to database ${obj.name}`
@@ -47,6 +140,7 @@ export const withMysqlDatabase = function (obj: WithMysqlDatabaseProps) {
       return {
         credentials: obj,
         instance: sequelize,
+        models: models,
       }
     } catch (e) {
       wLog(`[DB] Connecting failed to database ${obj.name}`)

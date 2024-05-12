@@ -6,8 +6,8 @@ import {
   getUpdateSchema,
   generateEnumTypeForGraphql,
   generateGenerateGraphQLCrud,
-  generateRowsFieldNameForModuleName,
-  generateRowFieldNameForModuleName,
+  convertWordIntoPlural,
+  convertWordIntoSingular,
   getOrderSchema,
 } from "./modulesHelpers"
 import { getMysqlTableInfo } from "../database/mysql/getTableInfo"
@@ -24,7 +24,7 @@ import has from "lodash.has"
 
 /**
  * Wertik js module
- * @param props see interface UseModuleProps
+ * @param moduleProps
  */
 export const withModule = (moduleProps: WithModuleProps) => {
   return async ({
@@ -39,10 +39,10 @@ export const withModule = (moduleProps: WithModuleProps) => {
     store.modules.push(moduleProps)
     let currentModuleRelationships = []
     let tableInstance: ModelStatic<Model<any, any>>
-    let graphqlSchema = [`type ${moduleProps.name}Module {`]
+    let graphqlSchema = [`type ${moduleProps.name} {`]
     let listSchema = ""
     let filterSchema = [
-      `input ${generateRowFieldNameForModuleName(
+      `input ${convertWordIntoSingular(
         moduleProps.name
       )}_filter_input {`,
     ]
@@ -102,7 +102,7 @@ export const withModule = (moduleProps: WithModuleProps) => {
       currentModuleRelationships.push(relationshipInfo)
       store.graphql.graphqlKeys.push(camelize(params.module))
       filterSchema.push(
-        `${camelize(params.graphqlKey)}: ${generateRowFieldNameForModuleName(
+        `${camelize(params.graphqlKey)}: ${convertWordIntoSingular(
           params.module
         )}_filter_input`
       )
@@ -122,13 +122,13 @@ export const withModule = (moduleProps: WithModuleProps) => {
       currentModuleRelationships.push(relationshipInfo)
       store.graphql.graphqlKeys.push(camelize(params.module))
       filterSchema.push(
-        `${camelize(params.graphqlKey)}: ${generateRowFieldNameForModuleName(
+        `${camelize(params.graphqlKey)}: ${convertWordIntoSingular(
           params.module
         )}_filter_input`
       )
     }
     const belongsToMany = (params: RelationParams) => {
-      let field_name = generateRowFieldNameForModuleName(params.module)
+      let field_name = convertWordIntoSingular(params.module)
       graphqlSchema.push(
         `${params.graphqlKey}(offset: Int, limit: Int, where: ${field_name}_filter_input, order: ${field_name}_order_input): [${params.module}Module]`
       )
@@ -145,13 +145,13 @@ export const withModule = (moduleProps: WithModuleProps) => {
       currentModuleRelationships.push(relationshipInfo)
       store.graphql.graphqlKeys.push(camelize(params.module))
       filterSchema.push(
-        `${camelize(params.graphqlKey)}: ${generateRowFieldNameForModuleName(
+        `${camelize(params.graphqlKey)}: ${convertWordIntoSingular(
           params.module
         )}_filter_input`
       )
     }
     const hasMany = (params: RelationParams) => {
-      let field_name = generateRowFieldNameForModuleName(params.module)
+      let field_name = convertWordIntoSingular(params.module)
       graphqlSchema.push(
         `${params.graphqlKey}(offset: Int, limit: Int, where: ${field_name}_filter_input, order: ${field_name}_order_input): [${params.module}Module]`
       )
@@ -168,7 +168,7 @@ export const withModule = (moduleProps: WithModuleProps) => {
       store.database.relationships.push(relationshipInfo)
       store.graphql.graphqlKeys.push(camelize(params.module))
       filterSchema.push(
-        `${camelize(params.graphqlKey)}: ${generateRowFieldNameForModuleName(
+        `${camelize(params.graphqlKey)}: ${convertWordIntoSingular(
           params.module
         )}_filter_input`
       )
@@ -199,7 +199,7 @@ export const withModule = (moduleProps: WithModuleProps) => {
       const connection = app.database[moduleProps.database]
       // info
       const tableInfo = await getMysqlTableInfo(
-        moduleProps,
+        moduleProps.table,
         connection.instance
       )
 
@@ -287,7 +287,7 @@ export const withModule = (moduleProps: WithModuleProps) => {
     }
 
     if (useDatabase) {
-      generateGenerateGraphQLCrud(moduleProps, schemaInformation, store)
+      generateGenerateGraphQLCrud(moduleProps, schemaInformation)
       app.models[moduleProps.name] = tableInstance
     }
 

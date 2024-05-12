@@ -1,9 +1,10 @@
-import store, { wertikApp } from "../store"
+import  { wertikApp } from "../store"
 import isPlainObject from "lodash.isplainobject"
 import get from "lodash.get"
 import has from "lodash.has"
 import convertFiltersIntoSequelizeObject from "../utils/convertFiltersIntoSequelizeObject"
 import { generateRequestedFieldsFromGraphqlInfo } from "../modules/modulesHelpers"
+import { SqlTable } from "src/types/database"
 
 const clean = (cleanObject) => {
   let recursion = (_obj) => {
@@ -29,21 +30,21 @@ const clean = (cleanObject) => {
 export const convertGraphqlRequestedFieldsIntoInclude = (
   graphqlFields = {},
   args: any = {},
-  module: any = {}
+  tableName: string = ""
 ) => {
   let order = []
   let depth = []
   graphqlFields = clean(graphqlFields)
-  const currentModuleRelationships = store.database.relationships.filter(
-    (f) => f.currentModule == module.name
-  )
+  let currentModel = wertikApp.models[tableName];
+  let currentModuleRelationshipsKeys =[]
+  let allRelationshipKeys = []
 
-  const currentModuleRelationshipsKeys = currentModuleRelationships.map(
-    (c) => c.graphqlKey
-  )
-  const allRelationshipKeys = store.database.relationships.map(
-    (c) => c.graphqlKey
-  )
+  for (const [modelName, model] of Object.entries(wertikApp.models)) {
+    for (const [key, relationship] of Object.entries(model.associations)) {
+      allRelationshipKeys.push(key)
+      currentModuleRelationshipsKeys.push(key)
+    }
+  }
 
   const requiredFilters = currentModuleRelationshipsKeys.filter((c) =>
     Object.keys(args.where ?? {}).includes(c)
@@ -58,17 +59,14 @@ export const convertGraphqlRequestedFieldsIntoInclude = (
 
     Object.keys(_obj).forEach((key) => {
       if (allRelationshipKeys.includes(key)) {
+        currentModel = currentModel.associations[key].target;
         depth.push(key)
         let _localDepth = [...JSON.parse(JSON.stringify(depth))]
-        const relationship = store.database.relationships.find(
-          (c) => c.graphqlKey === key
-        )
-        const sequelizeModel = wertikApp.models[relationship.referencedModule]
         const includeParams: { [key: string]: any } = {
           required: false,
-          model: sequelizeModel,
+          model: wertikApp.models[currentModel.tableName],
           as: key,
-          attributes: generateRequestedFieldsFromGraphqlInfo(_obj[key]),
+          attributes: generateRequestedFieldsFromGraphqlInfo(currentModel.tableName,_obj[key]),
           include:
             Object.keys(_obj[key]).length > 0 ? recursion(_obj[key]) : [],
         }

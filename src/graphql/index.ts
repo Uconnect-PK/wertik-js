@@ -4,6 +4,7 @@ import omit from "lodash.omit"
 import { defaultApolloGraphqlOptions } from "../utils/defaultOptions"
 import { ApolloServer } from "apollo-server-express"
 import graphqlDepthLimit from "graphql-depth-limit"
+import prettier from "prettier"
 
 import {
   WithApolloGraphqlProps,
@@ -15,22 +16,21 @@ export const withApolloGraphql = (props?: WithApolloGraphqlProps) => {
   return ({
     wertikApp,
     expressApp,
-    store,
     configuration,
   }: GraphqlInitializeProps) => {
     const depthLimit = get(props, "validation.depthLimit", 7)
     props = props ? props : {}
-    store.graphql.typeDefs = store.graphql.typeDefs.concat(
+    wertikApp.store.graphql.typeDefs = wertikApp.store.graphql.typeDefs.concat(
       get(configuration, "graphql.typeDefs", "")
     )
 
-    store.graphql.resolvers.Query = {
-      ...store.graphql.resolvers.Query,
+    wertikApp.store.graphql.resolvers.Query = {
+      ...wertikApp.store.graphql.resolvers.Query,
       ...get(configuration, "graphql.resolvers.Query", {}),
     }
 
-    store.graphql.resolvers.Mutation = {
-      ...store.graphql.resolvers.Mutation,
+    wertikApp.store.graphql.resolvers.Mutation = {
+      ...wertikApp.store.graphql.resolvers.Mutation,
       ...get(configuration, "graphql.resolvers.Mutation", {}),
     }
 
@@ -39,13 +39,19 @@ export const withApolloGraphql = (props?: WithApolloGraphqlProps) => {
     if (props && props.storeTypeDefFilePath) {
       if (fs.existsSync(props.storeTypeDefFilePath))
         fs.unlinkSync(props.storeTypeDefFilePath)
-      fs.writeFileSync(props.storeTypeDefFilePath, store.graphql.typeDefs)
+      
+      const formattedTypeDefs = prettier.format(wertikApp.store.graphql.typeDefs, {
+        filepath: props.storeTypeDefFilePath,
+        semi: false, 
+        parser: "graphql", 
+      })
+      fs.writeFileSync(props.storeTypeDefFilePath, formattedTypeDefs)
     }
 
     const GraphqlApolloServer = new ApolloServer({
-      typeDefs: store.graphql.typeDefs,
+      typeDefs: wertikApp.store.graphql.typeDefs,
       resolvers: {
-        ...store.graphql.resolvers,
+        ...wertikApp.store.graphql.resolvers,
       },
       ...defaultApolloGraphqlOptions,
       ...omit(options, ["context"]),

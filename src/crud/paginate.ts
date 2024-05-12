@@ -1,7 +1,7 @@
-import store from "../store"
 import convertFiltersIntoSequelizeObject from "../utils/convertFiltersIntoSequelizeObject"
 import omit from "lodash.omit"
 import isPlainObject from "lodash.isplainobject"
+import { wertikApp } from "../store"
 
 export const paginate = async (
   arg,
@@ -13,8 +13,8 @@ export const paginate = async (
   const { page = 1, limit = 100 } = arg.pagination ?? {}
   const offset = limit * (page - 1)
   const keys = [
-    ...store.database.relationships.map((c) => c.graphqlKey),
-    ...store.graphql.graphqlKeys,
+    ...wertikApp.store.database.relationships.map((c) => c.graphqlKey),
+    ...wertikApp.store.graphql.graphqlKeys,
   ]
   let where = omit(convertFiltersIntoSequelizeObject(arg.where), keys)
 

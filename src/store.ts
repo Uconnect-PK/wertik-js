@@ -36,65 +36,39 @@ export const wertikApp: WertikApp = {
   },
   redis: {},
   logger: null,
-}
-
-const store: {
-  graphql: {
-    graphqlKeys: string[]
-    typeDefs: string
-    resolvers: {
-      Query: {
-        [key: string]: Function
-      }
-      Mutation: {
-        [key: string]: Function
-      }
-      [key: string]: {
-        [key: string]: Function | string | number | boolean | object | any
-      }
-    }
-  }
-  database: {
-    relationships: StoreDatabaseRelationship[]
-    models: {
-      [key: string]: any
-    }
-  }
-  modules: WithModuleProps[]
-} = {
-  graphql: {
-    graphqlKeys: [],
-    typeDefs: `
-        ${generalSchema}
-        type Response {
-          message: String
-          version: String
-        }
-        type Query {
-          version: String
-        }
-        type Mutation {
-          version: String
-        }
-        schema {
-          query: Query
-          mutation: Mutation
-        }
-    `,
-    resolvers: {
-      Query: {
-        version: () => require("../../package.json").version,
-      },
-      Mutation: {
-        version: () => require("../../package.json").version,
+  store: {
+    graphql: {
+      graphqlKeys: [],
+      typeDefs: `
+          ${generalSchema}
+          type Response {
+            message: String
+            version: String
+          }
+          type Query {
+            version: String
+          }
+          type Mutation {
+            version: String
+          }
+          schema {
+            query: Query
+            mutation: Mutation
+          }
+      `,
+      resolvers: {
+        Query: {
+          version: () => require("../../package.json").version,
+        },
+        Mutation: {
+          version: () => require("../../package.json").version,
+        },
       },
     },
-  },
-  database: {
-    relationships: [],
-    models: {},
-  },
-  modules: [],
+    database: {
+      relationships: [],
+      models: {},
+    },
+    modules: [],
+  }
 }
-
-export default store

@@ -30,10 +30,10 @@ export const enumTypes = ["enum"]
 export const jsonTypes = ["json"]
 
 export const getMysqlTableInfo = async (
-  module: WithModuleProps,
+  tableName: string,
   sequelize: any
 ): Promise<TableInfo> => {
-  let rows = await sequelize.query(`describe ${module.table};`)
+  let rows = await sequelize.query(`describe ${tableName};`)
   rows = rows[0]
 
   if (rows) {
@@ -42,7 +42,7 @@ export const getMysqlTableInfo = async (
     ).map((element) => {
       const graphqlType = convertDatabaseTypeIntoGraphqlType(
         element,
-        module.name
+        tableName
       )
       let isPrimary = element.Key === "PRI"
       const isNull = element.Null === "YES"
@@ -63,14 +63,14 @@ export const getMysqlTableInfo = async (
     })
 
     return {
-      name: module.table,
+      name: tableName,
       columns: fields,
       originalDescribeColumns: rows,
     }
   }
 
   return {
-    name: module.table,
+    name: tableName,
     columns: [],
     originalDescribeColumns: rows,
   }

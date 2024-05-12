@@ -167,23 +167,6 @@ const Wertik: (configuration?: WertikConfiguration) => Promise<WertikApp> = (
         })
       }
 
-      let stopServer = () => {
-        wLogWithInfo(`[Wertik-App]`, `Stopping server`)
-        httpServer.close(() => {
-          wLogWithSuccess(`[Wertik-App]`, `Server stopped`)
-          process.exit()
-        })
-      }
-
-      let restartServer = () => {
-        wLogWithInfo(`[Wertik-App]`, `Restarting server`)
-        httpServer.close(() => {
-          setTimeout(() => {
-            startServer()
-          }, 500)
-        })
-      }
-
       if (!new Object(process.env).hasOwnProperty("TEST_MODE")) {
         setTimeout(async () => {
           if (selfStart === true) {
@@ -191,17 +174,11 @@ const Wertik: (configuration?: WertikConfiguration) => Promise<WertikApp> = (
           }
           resolve({
             ...wertikApp,
-            restartServer,
-            stopServer,
-            startServer,
           })
         }, 500)
       } else {
         resolve({
           ...wertikApp,
-          restartServer,
-          stopServer,
-          startServer,
         })
       }
     } catch (e) {

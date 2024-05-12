@@ -2,7 +2,7 @@ import { iObject } from "."
 import { AddMutationProps, AddQueryProps, RelationParams } from "./modules"
 
 export interface SqlTable {
-  name: string,
+  name: string
   /**
    * Sequelize Table Options
    */
@@ -27,29 +27,29 @@ export interface SqlTable {
      * Wertik-js creates create a schema from the database table. Once defined this, Wertik JS will ignore creating create a schema from the table information.
      */
     insertSchema: string
-  },
+  }
   relationships?: {
     hasOne?: {
       [tableName: string]: {
-        as: string,
+        as: string
         [key: string]: any
       }
-    },
+    }
     hasMany?: {
       [tableName: string]: {
-        as: string,
+        as: string
         [key: string]: any
       }
-    },
+    }
     belongsTo?: {
       [tableName: string]: {
-        as: string,
+        as: string
         [key: string]: any
       }
-    },
+    }
     belongsToMany?: {
       [tableName: string]: {
-        as: string,
+        as: string
         [key: string]: any
       }
     }
@@ -79,11 +79,11 @@ export interface WithMysqlDatabaseProps {
   /**
    * Sequelize Database options.
    */
-  options?: iObject,
+  options?: iObject
   /**
    * Tables
    */
-  tables?: SqlTable[];
+  tables?: SqlTable[]
 }
 
 export interface TableInfo {

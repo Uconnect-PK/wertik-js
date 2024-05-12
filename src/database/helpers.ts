@@ -77,34 +77,44 @@ export const convertDatabaseTypeIntoGraphqlType = (
   }
 }
 
-
-
-export const applyRelationshipsFromStoreToDatabase = async (
-  app: WertikApp
-) => {
-  Object.keys(app.database).forEach(dbName => {
-    let db = app.database[dbName];
+export const applyRelationshipsFromStoreToDatabase = async (app: WertikApp) => {
+  Object.keys(app.database).forEach((dbName) => {
+    let db = app.database[dbName]
     const tables = db?.credentials?.tables || []
-    tables.forEach(table => {
-      const currentModel = app.models[table.name];
+    tables.forEach((table) => {
+      const currentModel = app.models[table.name]
 
-      for (const [relationshipType, relationships] of Object.entries(table.relationships|| {})) {
-        for (const [relatedTableName, relationshipOptions] of Object.entries<SqlTable['relationships']['belongsTo']>(table.relationships[relationshipType] || {})) {
-          const relatedTable = app.models[relatedTableName];
+      for (const [relationshipType, relationships] of Object.entries(
+        table.relationships || {}
+      )) {
+        for (const [relatedTableName, relationshipOptions] of Object.entries<
+          SqlTable["relationships"]["belongsTo"]
+        >(table.relationships[relationshipType] || {})) {
+          const relatedTable = app.models[relatedTableName]
           if (!relatedTable) {
-            wLogWithError(`[DB] Related table not found:`, `model '${relatedTableName}' not found for relationship '${relationshipType}' in table '${table.name}'`)
+            wLogWithError(
+              `[DB] Related table not found:`,
+              `model '${relatedTableName}' not found for relationship '${relationshipType}' in table '${table.name}'`
+            )
             process.exit()
           }
-          wLogWithInfo(`[DB] Applying relationship:`, `${table.name}.${relationshipType}(${relatedTable.tableName},${JSON.stringify(relationshipOptions)})`)
+          wLogWithInfo(
+            `[DB] Applying relationship:`,
+            `${table.name}.${relationshipType}(${
+              relatedTable.tableName
+            },${JSON.stringify(relationshipOptions)})`
+          )
           currentModel[relationshipType](relatedTable, relationshipOptions)
-          const isManyRelationship = ['hasMany','belongsToMany'].includes(relationshipType)
+          const isManyRelationship = ["hasMany", "belongsToMany"].includes(
+            relationshipType
+          )
           if (isManyRelationship) {
             app.store.graphql.typeDefs = app.store.graphql.typeDefs.concat(`
             extend type ${table.name} {
               ${relationshipOptions.as}(offset: Int, limit: Int, where: ${table.name}_filter_input, order: ${table.name}_order_input): [${relatedTableName}]
             }
             `)
-          }else {
+          } else {
             app.store.graphql.typeDefs = app.store.graphql.typeDefs.concat(`
             extend type ${table.name} {
               ${relationshipOptions.as}: ${relatedTableName}
@@ -112,6 +122,6 @@ export const applyRelationshipsFromStoreToDatabase = async (
           }
         }
       }
-    });
-  });
+    })
+  })
 }

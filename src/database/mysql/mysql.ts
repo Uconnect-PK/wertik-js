@@ -49,7 +49,6 @@ export const withMysqlDatabase = function (obj: WithMysqlDatabaseProps) {
       })
       let models: ModelCtor<Model<any, any>>[] = []
       obj.tables?.forEach(async (table) => {
-
         let graphqlSchema = [`type ${table.name} {`]
         let listSchema = ""
         let filterSchema = [
@@ -67,9 +66,10 @@ export const withMysqlDatabase = function (obj: WithMysqlDatabaseProps) {
           // if (column.columnName === "id") return
 
           if (column.isEnum) {
-            wertikApp.store.graphql.typeDefs = wertikApp.store.graphql.typeDefs.concat(
-              generateEnumTypeForGraphql(column)
-            )
+            wertikApp.store.graphql.typeDefs =
+              wertikApp.store.graphql.typeDefs.concat(
+                generateEnumTypeForGraphql(column)
+              )
           }
 
           updateSchema = getUpdateSchema(table, tableInfo)
@@ -85,14 +85,13 @@ export const withMysqlDatabase = function (obj: WithMysqlDatabaseProps) {
                   column.columnName
                 }: ${column.graphqlType.toLowerCase()}_filter_input`
 
-          filterSchema.push(filter_input)
-
           fields[column.columnName] = {
             type: column.databaseType,
             allowNull: column.isNull,
             defaultValue: column.default,
             primaryKey: column.isPrimary,
             values: column.isEnum ? column.enumValues : null,
+            autoIncrement: column.extra === "auto_increment",
           }
         })
         graphqlSchema.push("}")
@@ -109,7 +108,6 @@ export const withMysqlDatabase = function (obj: WithMysqlDatabaseProps) {
             ...databaseDefaultOptions.sql.defaultTableOptions,
           }
         )
-
 
         wertikApp.models[table.name] = tableInstance
         const schemaInformation = {

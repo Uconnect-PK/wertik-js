@@ -13,11 +13,7 @@ import {
 import { wLogWithSuccess } from "../utils/log"
 
 export const withApolloGraphql = (props?: WithApolloGraphqlProps) => {
-  return ({
-    wertikApp,
-    expressApp,
-    configuration,
-  }: GraphqlInitializeProps) => {
+  return ({ wertikApp, expressApp, configuration }: GraphqlInitializeProps) => {
     const depthLimit = get(props, "validation.depthLimit", 7)
     props = props ? props : {}
     wertikApp.store.graphql.typeDefs = wertikApp.store.graphql.typeDefs.concat(
@@ -39,12 +35,15 @@ export const withApolloGraphql = (props?: WithApolloGraphqlProps) => {
     if (props && props.storeTypeDefFilePath) {
       if (fs.existsSync(props.storeTypeDefFilePath))
         fs.unlinkSync(props.storeTypeDefFilePath)
-      
-      const formattedTypeDefs = prettier.format(wertikApp.store.graphql.typeDefs, {
-        filepath: props.storeTypeDefFilePath,
-        semi: false, 
-        parser: "graphql", 
-      })
+
+      const formattedTypeDefs = prettier.format(
+        wertikApp.store.graphql.typeDefs,
+        {
+          filepath: props.storeTypeDefFilePath,
+          semi: false,
+          parser: "graphql",
+        }
+      )
       fs.writeFileSync(props.storeTypeDefFilePath, formattedTypeDefs)
     }
 

@@ -40,10 +40,7 @@ export const getMysqlTableInfo = async (
     const fields: TableInfo["columns"] = (
       rows as MysqlColumnInfoDescribeTable[]
     ).map((element) => {
-      const graphqlType = convertDatabaseTypeIntoGraphqlType(
-        element,
-        tableName
-      )
+      const graphqlType = convertDatabaseTypeIntoGraphqlType(element, tableName)
       let isPrimary = element.Key === "PRI"
       const isNull = element.Null === "YES"
 
@@ -59,6 +56,7 @@ export const getMysqlTableInfo = async (
         databaseType: graphqlType.databaseType,
         isPrimary: isPrimary,
         isDateColumn: graphqlType.isDateColumn,
+        extra: element.Extra,
       } as TableInfo["columns"][0]
     })
 

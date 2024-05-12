@@ -62,7 +62,7 @@ export interface WertikConfiguration {
   database?: {
     [key: string]: () => Promise<{
       credentials: WithMysqlDatabaseProps
-      instance: Sequelize,
+      instance: Sequelize
       models: WertikModule["tableInstance"][]
     }>
   }
@@ -181,8 +181,6 @@ export interface WertikConfiguration {
 export interface WertikApp {
   appEnv: "production" | "development" | "local"
   sendEmail?: (options: { mailer: string; options: SendEmailProps }) => iObject
-  restartServer: () => void
-  stopServer: () => void
   startServer: () => void
   port: number
   modules: {
@@ -211,7 +209,7 @@ export interface WertikApp {
       }
     }
     modules: WithModuleProps[]
-  } 
+  }
   database: {
     [key: string]: {
       credentials: {
@@ -219,11 +217,11 @@ export interface WertikApp {
         name: string
         password: string
         username: string
-        host: string,
-        tables: WithMysqlDatabaseProps['tables']
+        host: string
+        tables: WithMysqlDatabaseProps["tables"]
       }
-      instance: Sequelize,
-      models: WertikModule["tableInstance"][],
+      instance: Sequelize
+      models: WertikModule["tableInstance"][]
     }
   }
   models: {

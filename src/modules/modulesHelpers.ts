@@ -64,10 +64,7 @@ export const getGraphQLTypeNameFromSqlType = (
   }
 }
 
-export const getUpdateSchema = (
-  table: SqlTable,
-  tableInfo: TableInfo
-) => {
+export const getUpdateSchema = (table: SqlTable, tableInfo: TableInfo) => {
   const optionsUpdateSchema = get(table, "graphql.updateSchema", "")
   if (optionsUpdateSchema) return optionsUpdateSchema
   let updateSchema = [`input update_${table.name}_input {`]
@@ -83,10 +80,7 @@ export const getUpdateSchema = (
   return updateSchema.join("\n")
 }
 
-export const getInsertSchema = (
-  table: SqlTable,
-  tableInfo: TableInfo
-) => {
+export const getInsertSchema = (table: SqlTable, tableInfo: TableInfo) => {
   const optionsInsertSchema = get(table, "graphql.createSchema", "")
   const rowsFieldName = convertWordIntoPlural(table.name)
   if (optionsInsertSchema) return optionsInsertSchema
@@ -125,10 +119,7 @@ export const generateEnumTypeForGraphql = (column: TableInfo["columns"][0]) => {
    }`
 }
 
-export const generateGenerateGraphQLCrud = (
-  props,
-  schemaInformation
-) => {
+export const generateGenerateGraphQLCrud = (props, schemaInformation) => {
   const { graphql } = crud(props, schemaInformation, wertikApp.store)
   const resolvers = graphql.generateCrudResolvers()
 

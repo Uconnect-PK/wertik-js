@@ -17,8 +17,6 @@ type StoreDatabaseRelationship = {
  * @description This is the store of the app. It contains all the data that is required by the app to run.
  */
 export const wertikApp: WertikApp = {
-  restartServer: () => {},
-  stopServer: () => {},
   startServer: () => {},
   appEnv: "local",
   port: 1200,
@@ -70,5 +68,5 @@ export const wertikApp: WertikApp = {
       models: {},
     },
     modules: [],
-  }
+  },
 }

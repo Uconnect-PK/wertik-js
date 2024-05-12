@@ -42,9 +42,7 @@ export const withModule = (moduleProps: WithModuleProps) => {
     let graphqlSchema = [`type ${moduleProps.name} {`]
     let listSchema = ""
     let filterSchema = [
-      `input ${convertWordIntoSingular(
-        moduleProps.name
-      )}_filter_input {`,
+      `input ${convertWordIntoSingular(moduleProps.name)}_filter_input {`,
     ]
     let orderSchema = ""
 

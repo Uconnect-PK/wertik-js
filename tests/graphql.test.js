@@ -2,12 +2,11 @@ require("dotenv").config()
 
 const {
   default: wertik,
-  withModule,
   withMysqlDatabase,
   withApolloGraphql,
 } = require("../lib/index")
 
-const { database, Product, User } = require("./testUtils")
+const { database } = require("./testUtils")
 
 if (database.name) {
   describe("Expect withMysqlDatabase, withModule and withApolloGraphql, and expect module graphql operations work", () => {
@@ -17,10 +16,6 @@ if (database.name) {
         (app = wertik({
           database: {
             default: withMysqlDatabase(database),
-          },
-          modules: {
-            Product: withModule(Product),
-            User: withModule(User),
           },
           graphql: withApolloGraphql(),
         }).then((wertikApp) => {
@@ -51,6 +46,7 @@ if (database.name) {
         }
         `,
       })
+      console.log(testItem)
       expect(testItem.data.insert_products.returning[0].id).toBeGreaterThan(0)
       expect(testItem.data.insert_products.returning[0].sizes).toBe("lg")
     })

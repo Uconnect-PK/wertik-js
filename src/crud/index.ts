@@ -34,8 +34,12 @@ export default function (table, schemaInformation, store) {
         }
 
         extend type Query {
-            ${singleRowFieldName}(where: ${singleRowFieldName}_filter_input): ${table.name}
-            ${rowsFieldName}(pagination: PaginationInput, where: ${singleRowFieldName}_filter_input, order: ${convertWordIntoSingular(table.name)}_order_input): ${table.name}List
+            ${singleRowFieldName}(where: ${singleRowFieldName}_filter_input): ${
+          table.name
+        }
+            ${rowsFieldName}(pagination: PaginationInput, where: ${singleRowFieldName}_filter_input, order: ${convertWordIntoSingular(
+          table.name
+        )}_order_input): ${table.name}List
             count${table.name}(where: ${singleRowFieldName}_filter_input):  Int
         }`
       },

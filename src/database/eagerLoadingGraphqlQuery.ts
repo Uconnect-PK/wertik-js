@@ -1,4 +1,4 @@
-import  { wertikApp } from "../store"
+import { wertikApp } from "../store"
 import isPlainObject from "lodash.isplainobject"
 import get from "lodash.get"
 import has from "lodash.has"
@@ -35,8 +35,8 @@ export const convertGraphqlRequestedFieldsIntoInclude = (
   let order = []
   let depth = []
   graphqlFields = clean(graphqlFields)
-  let currentModel = wertikApp.models[tableName];
-  let currentModuleRelationshipsKeys =[]
+  let currentModel = wertikApp.models[tableName]
+  let currentModuleRelationshipsKeys = []
   let allRelationshipKeys = []
 
   for (const [modelName, model] of Object.entries(wertikApp.models)) {
@@ -59,14 +59,17 @@ export const convertGraphqlRequestedFieldsIntoInclude = (
 
     Object.keys(_obj).forEach((key) => {
       if (allRelationshipKeys.includes(key)) {
-        currentModel = currentModel.associations[key].target;
+        currentModel = currentModel.associations[key].target
         depth.push(key)
         let _localDepth = [...JSON.parse(JSON.stringify(depth))]
         const includeParams: { [key: string]: any } = {
           required: false,
           model: wertikApp.models[currentModel.tableName],
           as: key,
-          attributes: generateRequestedFieldsFromGraphqlInfo(currentModel.tableName,_obj[key]),
+          attributes: generateRequestedFieldsFromGraphqlInfo(
+            currentModel.tableName,
+            _obj[key]
+          ),
           include:
             Object.keys(_obj[key]).length > 0 ? recursion(_obj[key]) : [],
         }

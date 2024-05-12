@@ -1,3 +1,5 @@
+require("dotenv").config()
+
 import wertik, {
   withMysqlDatabase,
   withApolloGraphql,
@@ -18,36 +20,36 @@ wertik({
     storeTypeDefFilePath: process.cwd() + "/graphqlSchema.graphql",
   }),
   database: {
-    wertik: withMysqlDatabase({
-      port: 3306,
-      name: "wertik_test",
-      host: "127.0.0.1",
-      password: "pass",
-      username: "root",
+    ecommerce: withMysqlDatabase({
+      name: process.env.TEST_DATABASE_NAME,
+      host: process.env.TEST_DATABASE_HOST,
+      password: process.env.TEST_DATABASE_PASSWORD,
+      port: +process.env.TEST_DATABASE_PORT,
+      username: process.env.TEST_DATABASE_USERNAME,
       tables: [
         {
-          name: "user",
+          name: process.env.TEST_DATABASE_TABLE_PRODUCT,
+          relationships: {
+            belongsTo: {
+              user: {
+                as: "user",
+                foreignKey: "user_id",
+                targetKey: "id",
+              },
+            },
+          },
+        },
+        {
+          name: process.env.TEST_DATABASE_TABLE_USER,
           relationships: {
             hasMany: {
               product: {
                 as: "products",
                 foreignKey: "user_id",
                 sourceKey: "id",
-              }
-            }
-          }
-        },
-        {
-          name: "product",
-          relationships: {
-            hasOne: {
-              user: {
-                as: "user",
-                foreignKey: "id",
-                sourceKey: "user_id",
-              }
-            }
-          }
+              },
+            },
+          },
         },
       ],
     }),
@@ -59,50 +61,6 @@ wertik({
       port: 3306,
     }),
   },
-  // modules: modules,
-  // Product: withModule({
-  //   name: "Product",
-  //   useDatabase: true,
-  //   database: "wertik",
-  //   table: "product",
-  //   on: function ({ belongsTo }) {
-  //     belongsTo({
-  //       database: "wertik",
-  //       graphqlKey: "user",
-  //       module: "User",
-  //       options: {
-  //         as: "user",
-  //         foreignKey: "user_id",
-  //         targetKey: "id",
-  //       },
-  //     })
-  //   },
-  // }),
-  // User: withModule({
-  //   name: "User",
-  //   useDatabase: true,
-  //   database: "wertik",
-  //   table: "user",
-  //   on: function ({ hasMany }) {
-  //     hasMany({
-  //       database: "wertik",
-  //       graphqlKey: "products",
-  //       module: "Product",
-  //       options: {
-  //         as: "products",
-  //         foreignKey: "user_id",
-  //         sourceKey: "id",
-  //       },
-  //     })
-  //   },
-  // }),
-  // Category: withModule({
-  //   name: "Category",
-  //   useDatabase: true,
-  //   database: "wertik",
-  //   table: "category",
-  // }),
-  // },
   sockets: {
     mySockets: withWebSockets({
       path: "/websockets",
